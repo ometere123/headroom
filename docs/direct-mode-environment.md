@@ -11,7 +11,7 @@ python3 -m pip --python .venv/bin/python freeze
 
 Resolved top-level versions: `genlayer-test==0.29.2`, `genlayer-py==0.16.3`, `genvm-linter==0.11.1rc2`, `pytest==9.0.2`. The GenLayer package pair is compatible: genlayer-test 0.29.2 declares `genlayer-py>=0.13,<0.17`; 0.16.3 satisfies it. The complete environment freeze appears below.
 
-The contract header pins runner `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6`. Direct Mode uses the official GenVM `v0.2.16` universal archive in genlayer-test’s cache; the workflow fetches that version explicitly because genlayer-test 0.29.2 otherwise discovers a latest tag whose asset currently returns 404. The exact archive exists and contains the pinned runner (validated by the passing suite).
+The contract header pins runner `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6`. Direct Mode uses the official GenVM `v0.2.16` universal archive in genlayer-testâ€™s cache; the workflow fetches that version explicitly because genlayer-test 0.29.2 otherwise discovers a latest tag whose asset currently returns 404. The exact archive exists and contains the pinned runner (validated by the passing suite).
 
 Direct Mode result: **46 passed**. `tests/direct/conftest.py` includes a focused harness compatibility shim: genlayer-test 0.29.2's `vm.warp` moves its VM clock but leaves the cached message timestamp unchanged, so the fixture synchronizes `gl.message_raw.datetime` after a test warp. Production contract time remains the consensus message timestamp.
 
