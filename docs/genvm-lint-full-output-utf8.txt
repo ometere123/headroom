@@ -1,0 +1,33 @@
+### genvm-lint setup --contract contracts/headroom.py
+Detected SDK from contract header
+Setting up GenVM SDK...
+
+✓ SDK ready
+
+Add to VS Code settings.json:
+  "python.analysis.extraPaths": [
+    "C:\Users\USER\.cache\genvm-linter\extracted\genlayerlabs-genvm-manager-v0.6.0-rc5\py-lib-genlayer-std\11rhn002yfajawsz7fai6mykznbxkxs6l91iskj5cm82c92qhy3v",
+    "C:\Users\USER\.cache\genvm-linter\extracted\genlayerlabs-genvm-manager-v0.6.0-rc5\py-lib-protobuf\g626etbaad7a3zqdp7wqd7d5k0ywdphjkdxk9rg8abhx2ggmv8e0\src",
+  ],
+  "python.analysis.reportMissingModuleSource": "none"
+setup_exit=0
+### genvm-lint lint contracts/headroom.py
+✗ Lint failed
+  line 94: gl.nondet.* call in '_fetch' not reachable from equivalence principle block
+  line 244: gl.nondet.* call in 'Headroom.review_reservation.<locals>.leader_fn' not reachable from equivalence principle block
+  line 295: gl.nondet.* call in 'Headroom.review_change.<locals>.leader_fn' not reachable from equivalence principle block
+  line 299: gl.nondet.* call in 'Headroom.review_change.<locals>.leader_fn' not reachable from equivalence principle block
+  line 341: gl.nondet.* call in 'Headroom.verify_incident_measurement.<locals>.leader_fn' not reachable from equivalence principle block
+  line 387: gl.nondet.* call in 'Headroom.examine_incident.<locals>.leader_fn' not reachable from equivalence principle block
+  line 437: gl.nondet.* call in 'Headroom.resolve_challenge.<locals>.leader_fn' not reachable from equivalence principle block
+lint_exit=1
+### genvm-lint validate contracts/headroom.py
+
+✓ Validation passed
+  Contract: Headroom
+  Methods: 31 (10 view, 21 write)
+  ℹ py-genlayer: a newer runner is available (5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng). See https://github.com/genlayerlabs/genvm-manager/releases for changes.
+validate_exit=0
+### genvm-lint check contracts/headroom.py --json
+{"ok":false,"lint":{"ok":false,"passed":2,"warnings":[{"code":"E010","msg":"gl.nondet.* call in '_fetch' not reachable from equivalence principle block","line":94,"col":18},{"code":"E010","msg":"gl.nondet.* call in 'Headroom.review_reservation.<locals>.leader_fn' not reachable from equivalence principle block","line":244,"col":30},{"code":"E010","msg":"gl.nondet.* call in 'Headroom.review_change.<locals>.leader_fn' not reachable from equivalence principle block","line":295,"col":22},{"code":"E010","msg":"gl.nondet.* call in 'Headroom.review_change.<locals>.leader_fn' not reachable from equivalence principle block","line":299,"col":27},{"code":"E010","msg":"gl.nondet.* call in 'Headroom.verify_incident_measurement.<locals>.leader_fn' not reachable from equivalence principle block","line":341,"col":32},{"code":"E010","msg":"gl.nondet.* call in 'Headroom.examine_incident.<locals>.leader_fn' not reachable from equivalence principle block","line":387,"col":25},{"code":"E010","msg":"gl.nondet.* call in 'Headroom.resolve_challenge.<locals>.leader_fn' not reachable from equivalence principle block","line":437,"col":16}]},"validate":{"ok":true,"contract":"Headroom","methods":31,"view_methods":10,"write_methods":21,"ctor_params":0,"warnings":[{"code":"I200","msg":"py-genlayer: a newer runner is available (5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng). See https://github.com/genlayerlabs/genvm-manager/releases for changes."}]}}
+check_exit=1

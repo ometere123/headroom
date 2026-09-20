@@ -9,3 +9,7 @@ frontend/.env.local
 deployments/studionet.json
 
 frontend/tsconfig.tsbuildinfo
+
+.work-preserve-*/
+.tmp-*
+.lint-stable/

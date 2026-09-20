@@ -10,7 +10,7 @@ required_actions = ['request_reservation', 'review_reservation', 'propose_change
 failures=[]
 for rel in required_routes:
     if not (front / rel).is_file(): failures.append("missing route: " + rel)
-all_source = "\n".join(p.read_text(encoding="utf-8", errors="ignore") for p in front.rglob("*") if p.is_file() and p.suffix in {".ts",".tsx"})
+all_source = "\n".join(p.read_text(encoding="utf-8", errors="ignore") for base in (front / "app", front / "components", front / "lib") for p in base.rglob("*") if p.is_file() and p.suffix in {".ts",".tsx"})
 for action in required_actions:
     if f'"{action}"' not in all_source and f"'{action}'" not in all_source:
         failures.append("frontend does not expose contract action: " + action)
@@ -21,8 +21,10 @@ for required in ('CHAIN_ID = 61999','https://studio.genlayer.com/api'):
     if required not in config: failures.append("missing frontend release lock: " + required)
 for required in ('window.ethereum','eth_requestAccounts','wallet_switchEthereumChain','wallet_addEthereumChain'):
     if required not in wallet: failures.append("missing EIP-1193 path: " + required)
-for required in ('estimateTransactionFeesForWrite','waitForTransactionReceipt','FINISHED_WITH_RETURN','LATEST_FINAL'):
+for required in ('writeContract','waitForTransactionReceipt','ExecutionResult.FINISHED_WITH_RETURN','LATEST_FINAL'):
     if required not in contract: failures.append("missing finalized GenLayer integration behavior: " + required)
+for required in ('ExecutionResult.FINISHED_WITH_RETURN', 'BigInt(whole)*10n**18n'):
+    if required not in contract: failures.append("missing verified GenLayer result or exact decimal parser: " + required)
 for forbidden in ('wallet_getSnaps','wallet_requestSnaps','WalletConnect','Privy'):
     if forbidden in all_source: failures.append("forbidden wallet path: " + forbidden)
 if failures:

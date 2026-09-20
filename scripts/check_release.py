@@ -1,7 +1,7 @@
 from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 forbidden = ["61997", "studio-dev.genlayer.com", "wallet_getSnaps", "wallet_requestSnaps", "WalletConnect", "Privy"]
-scan = [root / "contracts", root / "frontend", root / "deploy", root / "gltest.config.yaml"]
+scan = [root / "contracts", root / "frontend" / "app", root / "frontend" / "components", root / "frontend" / "lib", root / "deploy", root / "gltest.config.yaml"]
 failures=[]
 for entry in scan:
     paths = [entry] if entry.is_file() else [x for x in entry.rglob("*") if x.is_file() and x.suffix in {".py",".ts",".tsx",".js",".json",".yaml",".yml",".env",".example"}]

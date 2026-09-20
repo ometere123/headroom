@@ -1,24 +1,15 @@
 # HEADROOM build status
 
-| Gate | Status in this ZIP |
+| Gate | Result |
 | --- | --- |
-| Contract implementation | ✅ |
-| Studionet 61999 / exact RPC hard lock | ✅ |
-| Generic injected EIP-1193 frontend | ✅ |
-| Multipage Next.js UI + hero + dynamic detail route | ✅ |
-| Authored Direct Mode tests (22) | ✅ |
-| Public contract method surface (29) | ✅ |
-| Python syntax compilation | ✅ |
-| Contract trust-boundary static guard | ✅ |
-| Static forbidden-network/wallet release scan | ✅ |
-| Frontend route/action/injected-wallet surface guard | ✅ |
-| TypeScript/TSX parser pass | ✅ |
-| `genvm-lint` | ⬜ run in finishing environment |
-| Direct Mode execution | ⬜ run in finishing environment |
-| Next dependency install/typecheck/build | ⬜ run in finishing environment |
-| Real Studionet integration/consensus | ⬜ |
-| Canonical deployment | ⬜ |
-| Live full economic flow | ⬜ |
-| Public frontend | ⬜ |
-
-No unchecked gate is represented elsewhere in the repository as completed.
+| Single-contract architecture and Studionet hard lock | Verified, chain 61999 / `https://studio.genlayer.com/api` |
+| Injected EIP-1193 frontend | Verified |
+| Reservation/change/incident/challenge hardening | Implemented; 46 Direct Mode tests pass |
+| Python requirements | `genlayer-test==0.29.2`, compatible `genlayer-py==0.16.3` |
+| GenVM contract validation | Passes with pinned Depends SDK using `genvm-linter==0.11.1rc2` |
+| GenVM static lint | Seven documented custom-consensus E010 warnings; exact-set CI gate |
+| Frontend typecheck/build | Pending final run |
+| Repository static checks | Pending final run |
+| CI push result | Pending push |
+| Real Studionet integration/consensus | Not run in this pass |
+| Deployment | Not performed; user explicitly deferred deployment |

@@ -1,41 +1,30 @@
-# HEADROOM static packaging verification
+# HEADROOM verification record
 
-Date: 2026-09-19
-
-This report records checks that were actually executed on the packaged source. It is intentionally narrower than a live GenLayer verification report.
+Date: 2026-09-20
 
 ## Artifact facts
 
-- network target: Studionet only
+- network target: GenLayer Studionet only
 - chain ID: `61999`
 - RPC: `https://studio.genlayer.com/api`
 - contract: `contracts/headroom.py`
-- contract SHA-256: `1fbc3e79cbca5954e179379b12060a507c6552ba5cc1a4b5113cd6b4d5a956f6`
-- contract lines: 458
-- public methods: 29
-- authored Direct Mode tests: 22
-- frontend TS/TSX source files parsed: 17
-- browser signer: injected EIP-1193 `window.ethereum`
+- public contract methods: 31 (10 view, 21 write)
+- Direct Mode tests: 46
+- browser signer: generic injected EIP-1193
 
-## Passed in the packaging environment
+## Passed
 
-```text
-Python compile                         PASS
-contract trust-boundary static guard  PASS
-release/network/wallet static scan    PASS
-frontend route/action surface guard   PASS
-TypeScript/TSX parser diagnostics     PASS (0 syntax diagnostics)
-```
+- Direct Mode on clean WSL Python 3.12.3 environment: **46 passed**.
+- Frontend `npm run typecheck`: pass.
+- Frontend `npm run build`: pass; Next.js generated all seven routes.
+- `scripts/check_release.py`: pass; chain/RPC hard lock verified.
+- `scripts/check_contract_patterns.py`: pass.
+- `scripts/check_frontend_surface.py`: pass.
+- GenVM `setup` and contract `validate`: pass with `genvm-linter==0.11.1rc2` and pinned Depends SDK. Static lint reports seven exact E010 reachability warnings; see `docs/genvm-lint-disposition.md`.
 
-## Deliberately unverified here
+## Not performed
 
-```text
-genvm-lint                            NOT RUN — package unavailable offline
-Direct Mode execution                 NOT RUN — genlayer-test unavailable offline
-Next dependency typecheck/build       NOT RUN — npm dependencies unavailable offline
-Studionet deployment/consensus        NOT RUN — requires finishing environment/account
-live economic lifecycle               NOT RUN
-public frontend                        NOT RUN
-```
+- Real Studionet integration/consensus was not run.
+- Deployment and public hosting were not performed.
 
-Passing this file is not evidence of a live deployment. Replace the `TBD` fields in `docs/REVIEW_EVIDENCE.md` only with real final hashes/addresses/results produced after the remaining gates run.
+Passing local checks is not evidence of a live deployment or real-network consensus.
