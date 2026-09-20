@@ -9,6 +9,10 @@ jobs:
         with: {python-version: '3.12'}
       - run: pip install -r requirements.txt
       - run: python scripts/check_genvm_lint.py
+      - name: Cache the compatible Direct Mode runner
+        run: |
+          mkdir -p ~/.cache/gltest-direct
+          curl --fail --location --retry 3 https://github.com/genlayerlabs/genvm/releases/download/v0.2.16/genvm-universal.tar.xz --output ~/.cache/gltest-direct/genvm-universal-v0.2.16.tar.xz
       - run: pytest tests/direct/ -v
       - run: python scripts/check_release.py
       - run: python scripts/check_contract_patterns.py
