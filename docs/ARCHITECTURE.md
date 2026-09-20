@@ -50,7 +50,7 @@ ACTIVE COVENANT
 
 ## Formation prevention: deterministic headroom
 
-A reservation cannot even reach semantic admission unless two mechanical gates pass at request time:
+A request with impossible capacity or collateral is recorded as `DENIED_DETERMINISTIC`, increments prevention metrics, and cannot be reviewed. Only requests passing both mechanical gates reach semantic admission. The same checks run again immediately before SAFE activation to close races:
 
 ```text
 reserved_units + requested_units <= capacity_ceiling * (1 - minimum_headroom)
@@ -61,7 +61,7 @@ This prevents capacity overbooking and under-collateralized promises before an L
 
 ## Formation prevention: live semantic admission
 
-A covenant freezes 2..8 admission sources. The packet must contain at least two source families, an `INDEPENDENT_PROBE`, and at least one provider/capacity-class source.
+A covenant freezes its bounded origin/class registry and 2..8 admission sources. Each submitted source must match an authorized origin and class. The packet must contain at least two distinct origins and source classes, an `INDEPENDENT_PROBE`, and at least one provider/capacity-class source. Provider-controlled service/status/capacity origins cannot be registered as independent probes. Later evidence URLs may use new paths under a frozen origin; redirects are not claimed as verified because GenLayer does not expose redirect destinations.
 
 `review_reservation()` independently re-fetches those sources and validators reproduce:
 
@@ -89,7 +89,7 @@ A provider change first passes deterministic notice-duration rules. `review_chan
 
 ## Incident measurement gate
 
-A customer can submit a claimed miss only inside its active reservation window. The measurement packet must use at least two allowed source families and include an independent probe. `verify_incident_measurement()` independently establishes the exact service/window and measured availability.
+A customer can submit a claimed miss only inside its active reservation window. The measurement packet must use at least two distinct origins and authorized source classes, including a registered independent probe. `verify_incident_measurement()` independently establishes the exact service/window and measured availability.
 
 A customer assertion therefore cannot create provider liability by itself:
 
@@ -101,9 +101,7 @@ A customer assertion therefore cannot create provider liability by itself:
 
 The provider may invoke only a frozen exception. `examine_incident()` combines the independently verified measurement evidence with the exception evidence and asks validators to reproduce a structured factual/legal-protocol record:
 
-- impact start/end;
-- exception-event start/end;
-- causal overlap basis points;
+- bounded impact start/end and exception-event start/end timestamps;
 - service affected;
 - exception event established;
 - causal link supported;
@@ -119,12 +117,7 @@ HEADROOM deliberately does **not** let a second LLM invent a payout percentage. 
 
 If there is source conflict, no service impact, no established exception event, no supported causation, the clause rule is not satisfied, or a required permit is missing, the exception gets zero excused share and provider liability is `10000` bps.
 
-Otherwise:
-
-```text
-excused_bps = consensus causal_overlap_bps
-liable_bps  = 10000 - excused_bps
-```
+Otherwise, contract code intersects the validated impact and exception intervals with the frozen observation window, divides the resulting overlap duration by the frozen measured impact duration, clamps the result to 0..10000 basis points, and derives provider liability as `10000 - excused_bps`. The semantic model supplies timestamps and factual predicates; it never supplies an economic percentage.
 
 That produces `EXCUSED`, `PARTIAL` or `LIABLE` deterministically.
 

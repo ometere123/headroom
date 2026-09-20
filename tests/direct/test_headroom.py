@@ -18,15 +18,16 @@ MEASUREMENT = json.dumps([
     {"kind":"STATUS_AGGREGATOR","url":"https://status-archive.example/incident","note":"separate public archive for the same window"},
 ])
 UPSTREAM = json.dumps([{"kind":"UPSTREAM_STATUS","url":"https://status.example/up","note":"upstream incident timeline"}])
+REGISTRY = json.dumps([{"kind":"PROVIDER_STATUS","origin":"https://service.example"},{"kind":"INDEPENDENT_PROBE","origin":"https://probe.example"},{"kind":"STATUS_AGGREGATOR","origin":"https://status-archive.example"},{"kind":"UPSTREAM_STATUS","origin":"https://status.example"},{"kind":"CHANGE_NOTICE","origin":"https://change.example"},{"kind":"CHALLENGE_COUNTER_EVIDENCE","origin":"https://counter.example"}])
 
 
-def create(vm, c, provider, bond=10 * 10**18):
+def create(vm, c, provider, bond=10 * 10**18, registry=REGISTRY):
     vm.sender = provider
     vm.value = bond
     vm.warp("2026-09-19T12:00:00Z")
     cid = c.create_covenant(
         "Payments EU", "https://api.example.com", 10000, 1000, 9995,
-        172800, 7200, SOURCES,
+        172800, 7200, SOURCES, registry,
         "Admission requires live provider and independent evidence. Incident causation requires public timeline evidence.",
         EXC, 900,
     )
@@ -34,9 +35,9 @@ def create(vm, c, provider, bond=10 * 10**18):
     return cid
 
 
-def active_reservation(vm, deploy, provider, customer, credit=10**18):
+def active_reservation(vm, deploy, provider, customer, credit=10**18, registry=REGISTRY):
     c = deploy(CONTRACT)
-    cid = create(vm, c, provider)
+    cid = create(vm, c, provider,registry=registry)
     vm.sender = customer
     rid = c.request_reservation(cid, 1000, credit, 1790000000, 1790180000, "steady API workload")
     vm.mock_web(r".*", {"status":200, "body":"Payments EU healthy. No active incident. Independent probe healthy. Capacity remains within declared envelope."})
@@ -68,8 +69,8 @@ def verified_incident(vm, c, rid, customer, measured=9900):
     return iid
 
 
-def pending_liability(vm, deploy, provider, customer):
-    c, cid, rid = active_reservation(vm, deploy, provider, customer)
+def pending_liability(vm, deploy, provider, customer, registry=REGISTRY):
+    c, cid, rid = active_reservation(vm, deploy, provider, customer,registry=registry)
     iid = verified_incident(vm, c, rid, customer)
     vm.sender = provider
     c.claim_exception(iid, "UPSTREAM", UPSTREAM, "")
@@ -99,24 +100,30 @@ def test_admission_requires_independent_and_provider_source_families(direct_vm, 
     c = direct_deploy(CONTRACT); direct_vm.sender = direct_alice; direct_vm.value = 10**18; direct_vm.warp("2026-09-19T12:00:00Z")
     bad = json.dumps([{"kind":"PROVIDER_STATUS","url":"https://one.example/a","note":"one source"},{"kind":"PROVIDER_STATUS","url":"https://two.example/b","note":"same family"}])
     with direct_vm.expect_revert("source families"):
-        c.create_covenant("API", "https://api.example.com", 1000, 1000, 9995, 3600, 1800, bad, "public evidence policy", EXC, 900)
+        c.create_covenant("API", "https://api.example.com", 1000, 1000, 9995, 3600, 1800, bad, REGISTRY, "public evidence policy", EXC, 900)
 
 
 def test_capacity_precheck_prevents_overpromise(direct_vm, direct_deploy, direct_alice, direct_bob):
     c = direct_deploy(CONTRACT); cid = create(direct_vm, c, direct_alice); direct_vm.sender = direct_bob
     rid = c.request_reservation(cid, 9500, 10**18, 1790000000, 1790180000, "large workload")
     r=c.get_reservation(rid)
-    assert r["status"] == "PENDING_ADMISSION" and r["capacity_precheck"] is False
-    assert c.get_covenant(cid)["reserved_units"] == 0
+    assert r["status"] == "DENIED_DETERMINISTIC" and r["capacity_precheck"] is False
+    assert "capacity headroom failure" in r["admission_basis"]
+    cv=c.get_covenant(cid);assert cv["reserved_units"] == 0 and cv["reserved_liability_atto"] == "0" and cv["active_reservations"] == 0
+    assert c.get_stats()["prevented"] == 1
+    with direct_vm.expect_revert("not reviewable"):c.review_reservation(rid)
 
 
 def test_liability_precheck_prevents_uncollateralized_promise(direct_vm, direct_deploy, direct_alice, direct_bob):
     c = direct_deploy(CONTRACT); cid = create(direct_vm, c, direct_alice, bond=10**18); direct_vm.sender = direct_bob
     rid = c.request_reservation(cid, 1000, 2 * 10**18, 1790000000, 1790180000, "normal workload")
     r = c.get_reservation(rid)
-    assert r["liability_precheck"] is False and r["status"] == "PENDING_ADMISSION"
+    assert r["liability_precheck"] is False and r["status"] == "DENIED_DETERMINISTIC"
+    assert "collateral/liability headroom failure" in r["admission_basis"]
     cv=c.get_covenant(cid)
-    assert cv["reserved_liability_atto"] == "0" and cv["active_reservations"] == 0
+    assert cv["reserved_liability_atto"] == "0" and cv["reserved_units"] == 0 and cv["active_reservations"] == 0
+    assert c.get_stats()["prevented"] == 1
+    with direct_vm.expect_revert("not reviewable"):c.review_reservation(rid)
 
 
 def test_live_safe_admission_reserves_capacity_and_liability(direct_vm, direct_deploy, direct_alice, direct_bob):
@@ -330,7 +337,7 @@ def test_duplicate_source_origins_are_not_independent(direct_vm,direct_deploy,di
     c=direct_deploy(CONTRACT);direct_vm.sender=direct_alice;direct_vm.value=10**18;direct_vm.warp("2026-09-19T12:00:00Z")
     sources=json.dumps([{"kind":"PROVIDER_STATUS","url":"https://same.example/status","note":"first"},{"kind":"INDEPENDENT_PROBE","url":"https://same.example/probe","note":"masquerading origin"}])
     with direct_vm.expect_revert("duplicate evidence origins"):
-        c.create_covenant("API","https://api.example.com",1000,1000,9995,3600,1800,sources,"independent public evidence",EXC,900)
+        c.create_covenant("API","https://api.example.com",1000,1000,9995,3600,1800,sources,REGISTRY,"independent public evidence",EXC,900)
 
 
 def test_impossible_examination_intervals_are_rejected(direct_vm,direct_deploy,direct_alice,direct_bob):
@@ -373,7 +380,7 @@ def test_64_unadmitted_requests_cannot_lock_capacity_or_collateral(direct_vm,dir
     request_ids=[]
     for customer in customers:
         direct_vm.sender=customer
-        request_ids.append(c.request_reservation(cid,10000,10**18,1790000000,1790180000,"unadmitted request"))
+        request_ids.append(c.request_reservation(cid,1000,10**18,1790000000,1790180000,"unadmitted request"))
     assert len(request_ids)==64 and all(c.get_reservation(rid)["status"]=="PENDING_ADMISSION" for rid in request_ids)
     cv=c.get_covenant(cid)
     assert cv["reserved_units"]==0 and cv["reserved_liability_atto"]=="0" and cv["active_reservations"]==0
@@ -624,3 +631,56 @@ def test_timeout_default_certificate_contains_full_case(direct_vm,direct_deploy,
     assert cert["examination"]=={}
     assert incident["settlement_hash"]==hashlib.sha256(json.dumps(cert,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     assert c.get_stats()["accounting_balanced"] is True
+
+
+def test_arbitrary_origin_cannot_self_label_independent_probe(direct_vm,direct_deploy,direct_alice):
+    c=direct_deploy(CONTRACT);direct_vm.sender=direct_alice;direct_vm.value=10**18;direct_vm.warp("2026-09-19T12:00:00Z")
+    sources=json.dumps([{"kind":"PROVIDER_STATUS","url":"https://service.example/status","note":"provider status"},{"kind":"INDEPENDENT_PROBE","url":"https://attacker.example/probe","note":"self declared probe"}])
+    with direct_vm.expect_revert("origin/class is not authorized"):
+        c.create_covenant("API","https://api.example.com",1000,1000,9995,3600,1800,sources,REGISTRY,"public evidence policy",EXC,900)
+
+def test_provider_controlled_origin_cannot_be_registered_as_independent(direct_vm,direct_deploy,direct_alice):
+    c=direct_deploy(CONTRACT);direct_vm.sender=direct_alice;direct_vm.value=10**18;direct_vm.warp("2026-09-19T12:00:00Z")
+    registry=json.dumps([{"kind":"INDEPENDENT_PROBE","origin":"https://api.example.com"},{"kind":"PROVIDER_STATUS","origin":"https://service.example"}])
+    with direct_vm.expect_revert("service origin is provider-controlled"):
+        c.create_covenant("API","https://api.example.com",1000,1000,9995,3600,1800,SOURCES,registry,"public evidence policy",EXC,900)
+
+def test_frozen_origin_with_wrong_class_is_rejected_for_measurement(direct_vm,direct_deploy,direct_alice,direct_bob):
+    c,cid,rid=active_reservation(direct_vm,direct_deploy,direct_alice,direct_bob)
+    wrong=json.dumps([{"kind":"INDEPENDENT_PROBE","url":"https://probe.example/incident","note":"probe"},{"kind":"PUBLIC_TELEMETRY","url":"https://status-archive.example/incident","note":"wrong class for registered origin"}])
+    with direct_vm.expect_revert("origin/class is not authorized"):
+        c.open_incident(rid,9900,1790001000,1790004600,wrong)
+
+def test_correct_frozen_origin_class_is_accepted(direct_vm,direct_deploy,direct_alice,direct_bob):
+    c,cid,rid=active_reservation(direct_vm,direct_deploy,direct_alice,direct_bob)
+    iid=c.open_incident(rid,9900,1790001000,1790004600,MEASUREMENT)
+    assert c.get_incident(iid)["status"]=="MEASUREMENT_PENDING"
+
+def test_source_registry_rejects_duplicate_origin_across_classes(direct_vm,direct_deploy,direct_alice):
+    c=direct_deploy(CONTRACT);direct_vm.sender=direct_alice;direct_vm.value=10**18;direct_vm.warp("2026-09-19T12:00:00Z")
+    registry=json.dumps([{"kind":"PROVIDER_STATUS","origin":"https://service.example"},{"kind":"INDEPENDENT_PROBE","origin":"https://service.example"}])
+    with direct_vm.expect_revert("origin may be registered only once"):
+        c.create_covenant("API","https://api.example.com",1000,1000,9995,3600,1800,SOURCES,registry,"public evidence policy",EXC,900)
+
+
+def test_change_evidence_must_use_its_frozen_class(direct_vm,direct_deploy,direct_alice):
+    c=direct_deploy(CONTRACT);cid=create(direct_vm,c,direct_alice);direct_vm.sender=direct_alice
+    start=1790000000;end=start+1800;notice=1789819200
+    with direct_vm.expect_revert("origin/class is not authorized"):
+        c.propose_change(cid,"Planned change","online migration",notice,start,end,"https://status-archive.example/plan")
+
+def test_exception_evidence_must_use_its_frozen_class(direct_vm,direct_deploy,direct_alice,direct_bob):
+    c,cid,rid=active_reservation(direct_vm,direct_deploy,direct_alice,direct_bob);iid=verified_incident(direct_vm,c,rid,direct_bob)
+    direct_vm.sender=direct_alice
+    wrong=json.dumps([{"kind":"UPSTREAM_STATUS","url":"https://status-archive.example/wrong-class","note":"origin is registered only as aggregator"}])
+    with direct_vm.expect_revert("origin/class is not authorized"):
+        c.claim_exception(iid,"UPSTREAM",wrong,"")
+
+def test_challenge_evidence_requires_frozen_challenge_class(direct_vm,direct_deploy,direct_alice,direct_bob):
+    registry_items=json.loads(REGISTRY)
+    registry_items=[dict(x,kind="STATUS_AGGREGATOR") if x["origin"]=="https://counter.example" else x for x in registry_items]
+    wrong_registry=json.dumps(registry_items)
+    c,cid,rid,iid=pending_liability(direct_vm,direct_deploy,direct_alice,direct_bob,wrong_registry)
+    direct_vm.sender=direct_bob;direct_vm.value=10**16
+    with direct_vm.expect_revert("origin/class is not authorized"):
+        c.challenge_liability(iid,"wrongly classified counter evidence","https://counter.example/evidence")

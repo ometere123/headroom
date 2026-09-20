@@ -1,30 +1,32 @@
 # HEADROOM review evidence
 
-This file is intentionally blank of invented deployment claims. Fill it only after the final source is linted, tested and deployed.
+This record distinguishes local and CI checks from live-network proof. Values for source counts are generated from the current contract and tests.
 
-## Canonical release
+## Current source and quality gates
 
-- network: Studionet / `61999`
-- RPC: `https://studio.genlayer.com/api`
-- contract: **TBD**
-- deployment tx: **TBD**
-- source commit: **TBD**
-- hosted frontend: **TBD**
+- source: `main` at the current pushed commit (see repository history)
+- contract: `contracts/headroom.py`
+- contract lines: **609**
+- public methods: **10 views / 21 writes**
+- Direct Mode tests: **54**
+- Python compile: **PASS**
+- GenVM validation: **PASS** with pinned Depends SDK using `genvm-linter==0.11.1rc2`
+- GenVM static lint: seven documented E010 custom `run_nondet_unsafe` reachability warnings; only this exact set is allowed by CI. Full diagnostics are in `genvm-lint-full-output.txt` and disposition in `genvm-lint-disposition.md`.
+- Direct Mode: **PASS** (see latest GitHub Actions run)
+- release/contract-pattern/frontend-surface static checks: **PASS**
+- frontend typecheck and production build: **PASS**
+- CI: [latest HEADROOM CI run on `main`](https://github.com/ometere123/headroom/actions/workflows/ci.yml?query=branch%3Amain)
 
-## Quality gates
+## Live release gates pending
 
-- `genvm-lint`: **TBD**
-- Direct Mode: **TBD**
-- integration / real consensus: **TBD**
-- frontend typecheck: **TBD**
-- production build: **TBD**
-- deployed source/schema match: **TBD**
-- full economic lifecycle: **TBD**
+- contract address and deployment transaction
+- real Studionet independent consensus evidence
+- complete live economic lifecycle and accounting proof
+- deployed source/schema comparison
+- deployed-address frontend wiring and hosted frontend
+
+No live deployment or consensus outcome is represented as complete.
 
 ## Reviewer thesis
 
-HEADROOM is deliberately two-sided: formation consensus prevents unsafe contractual risk from entering the system, while incident consensus resolves liability only when prevention fails. The same covenant governs both.
-
-## Static package evidence
-
-Before deployment, the packaged source passed Python compilation, the contract-pattern trust-boundary check, the forbidden-network/wallet release scan and a TypeScript/TSX parser pass. Contract surface: **29 public methods**. Authored Direct Mode tests: **22**. These are static package checks only; they do not replace the `TBD` live gates above. See `STATIC_VERIFICATION.md`.
+HEADROOM establishes consensus before risk. Deterministic capacity and collateral checks prevent impossible requests from reaching semantic admission. Frozen evidence-origin classes bind source claims to authorized HTTPS origins. When prevention fails, consensus establishes bounded incident facts and contract code derives the liability and final settlement certificate.

@@ -2,14 +2,15 @@
 
 | Gate | Result |
 | --- | --- |
-| Single-contract architecture and Studionet hard lock | Verified, chain 61999 / `https://studio.genlayer.com/api` |
-| Injected EIP-1193 frontend | Verified |
-| Reservation/change/incident/challenge hardening | Implemented; 46 Direct Mode tests pass |
-| Python requirements | `genlayer-test==0.29.2`, compatible `genlayer-py==0.16.3` |
-| GenVM contract validation | Passes with pinned Depends SDK using `genvm-linter==0.11.1rc2` |
-| GenVM static lint | Seven documented custom-consensus E010 warnings; exact-set CI gate |
-| Frontend typecheck/build | Pending final run |
-| Repository static checks | Pending final run |
-| CI push result | Pending push |
-| Real Studionet integration/consensus | Not run in this pass |
-| Deployment | Not performed; user explicitly deferred deployment |
+| Single-contract architecture and network lock | Verified; Studionet chain 61999 / `https://studio.genlayer.com/api` |
+| Admission deterministic prechecks | Failed capacity/collateral requests are persisted as `DENIED_DETERMINISTIC`, counted as prevented, and excluded from semantic review |
+| Pending admission accounting | Pending requests reserve no units, liability, or active slot; SAFE activation rechecks live headroom |
+| Evidence provenance | Covenant freezes bounded HTTPS origin/class registry; every consequential source must match |
+| Contract surface | 10 public views / 21 public writes |
+| Direct Mode adversarial tests | 54 tests |
+| GenVM validation and lint gate | Validation passes; CI allows only the seven documented E010 custom consensus diagnostics |
+| Frontend typecheck and production build | Passed |
+| Release, contract-pattern and frontend-surface checks | Passed |
+| GitHub Actions | Passed on pushed `main`; current workflow result linked in `docs/REVIEW_EVIDENCE.md` |
+| Real Studionet integration/consensus | Pending |
+| Deployment and public hosting | Pending; no deployment performed |

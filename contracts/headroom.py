@@ -6,13 +6,15 @@ import hashlib,json,re
 from datetime import datetime,timezone
 
 VERSION="0.1.0-studionet";NETWORK_ID = "61999";RPC_URL = "https://studio.genlayer.com/api"
-MIN_PROVIDER_BOND=10**16;MAX_PROVIDER_BOND=1000*10**18;MIN_CREDIT=10**14;MAX_PAGE=30;MAX_SOURCES=8;MAX_EXCEPTIONS=8;MAX_ACTIVE=64;CHALLENGE_MIN=600;CHALLENGE_MAX=86400;PROVIDER_RESPONSE_SECONDS=3600;ADJUDICATION_GRACE_SECONDS=24*3600;MEASUREMENT_RETRY_SECONDS=6*3600;CHALLENGE_RESOLUTION_GRACE_SECONDS=24*3600
+MIN_PROVIDER_BOND=10**16;MAX_PROVIDER_BOND=1000*10**18;MIN_CREDIT=10**14;MAX_PAGE=30;MAX_SOURCES=8;MAX_SOURCE_REGISTRY=32;MAX_EXCEPTIONS=8;MAX_ACTIVE=64;CHALLENGE_MIN=600;CHALLENGE_MAX=86400;PROVIDER_RESPONSE_SECONDS=3600;ADJUDICATION_GRACE_SECONDS=24*3600;MEASUREMENT_RETRY_SECONDS=6*3600;CHALLENGE_RESOLUTION_GRACE_SECONDS=24*3600
 FORMATION_LEAD_SECONDS=300
 ADMISSION_RESULTS=("SAFE","UNSAFE","INCONCLUSIVE","SOURCE_UNAVAILABLE")
 MEASUREMENT_RESULTS=("VERIFIED","NOT_PROVEN","SOURCE_UNAVAILABLE")
 EXAM_RESULTS=("VERIFIED","INCONCLUSIVE","SOURCE_UNAVAILABLE")
 ADMISSION_SOURCE_KINDS=("PROVIDER_STATUS","INDEPENDENT_PROBE","DEPENDENCY_STATUS","PUBLIC_TELEMETRY","CAPACITY_REPORT")
-MEASUREMENT_SOURCE_KINDS=("INDEPENDENT_PROBE","STATUS_AGGREGATOR","PUBLIC_TELEMETRY","PROVIDER_STATUS")
+MEASUREMENT_SOURCE_KINDS=("INDEPENDENT_PROBE","STATUS_AGGREGATOR","PUBLIC_TELEMETRY","PROVIDER_STATUS","UPSTREAM_STATUS")
+SOURCE_REGISTRY_KINDS=("INDEPENDENT_PROBE","PROVIDER_STATUS","STATUS_AGGREGATOR","UPSTREAM_STATUS","PUBLIC_TELEMETRY","DEPENDENCY_STATUS","CAPACITY_REPORT","CHANGE_NOTICE","CHALLENGE_COUNTER_EVIDENCE")
+EXCEPTION_SOURCE_KINDS=("PROVIDER_STATUS","STATUS_AGGREGATOR","UPSTREAM_STATUS","PUBLIC_TELEMETRY","DEPENDENCY_STATUS")
 
 
 def _now() -> int:
@@ -55,6 +57,33 @@ def _sources(raw,min_count=1):
         if origin in seen:raise gl.vm.UserError("[EXPECTED] duplicate evidence origins are not independent")
         seen[origin]=1;out.append({"id":f"S{i+1}","url":url,"origin":origin,"kind":kind,"note":note})
     return out
+def _source_registry(raw,service_url):
+    try:items=json.loads(_text(raw,"source registry JSON",12000,2))
+    except Exception:raise gl.vm.UserError("[EXPECTED] source registry must be JSON") from None
+    if not isinstance(items,list) or not 1<=len(items)<=MAX_SOURCE_REGISTRY:raise gl.vm.UserError(f"[EXPECTED] use 1..{MAX_SOURCE_REGISTRY} source registry entries")
+    out=[];seen={}
+    for item in items:
+        if not isinstance(item,dict):raise gl.vm.UserError("[EXPECTED] source registry entry must be object")
+        kind=_text(str(item.get("kind","")),"source class",50).upper();origin_url=_https(str(item.get("origin","")),"source origin");origin=_origin(origin_url,"source origin")
+        if origin_url.rstrip("/").lower()!=("https://"+origin) or kind not in SOURCE_REGISTRY_KINDS:raise gl.vm.UserError("[EXPECTED] source registry requires a canonical HTTPS origin and supported class")
+        if origin in seen:raise gl.vm.UserError("[EXPECTED] source origin may be registered only once")
+        seen[origin]=1;out.append({"kind":kind,"origin":origin})
+    service_origin=_origin(service_url,"service")
+    if service_origin in seen and next(x["kind"] for x in out if x["origin"]==service_origin)!="PROVIDER_STATUS":raise gl.vm.UserError("[EXPECTED] service origin is provider-controlled")
+    controlled={service_origin}|{x["origin"] for x in out if x["kind"] in ("PROVIDER_STATUS","CAPACITY_REPORT")}
+    if any(x["kind"]=="INDEPENDENT_PROBE" and x["origin"] in controlled for x in out):raise gl.vm.UserError("[EXPECTED] provider-controlled origin cannot be registered as independent")
+    return out
+
+def _authorize_sources(registry,sources,allowed_kinds):
+    policy={(x["kind"],x["origin"]) for x in registry}
+    for source in sources:
+        if source["kind"] not in allowed_kinds or (source["kind"],source["origin"]) not in policy:raise gl.vm.UserError("[EXPECTED] evidence origin/class is not authorized by frozen source registry")
+
+def _authorize_url(registry,url,kind):
+    origin=_origin(url,"evidence")
+    if (kind,origin) not in {(x["kind"],x["origin"]) for x in registry}:raise gl.vm.UserError("[EXPECTED] evidence origin/class is not authorized by frozen source registry")
+    return origin
+
 def _admission_sources(raw,service_url):
     out=_sources(raw,2)
     kinds=[x["kind"] for x in out]
@@ -217,18 +246,18 @@ class Headroom(gl.Contract):
     def _balanced(self):return int(self.total_deposited)==int(self.covenant_escrow)+int(self.challenge_escrow)+int(self.total_claimable)+int(self.total_withdrawn)
 
     @gl.public.write.payable
-    def create_covenant(self,service_name:str,service_url:str,capacity_ceiling_units:int,min_headroom_bps:int,availability_target_bps:int,maintenance_notice_seconds:int,max_maintenance_seconds:int,admission_sources_json:str,evidence_policy:str,exceptions_json:str,challenge_window_seconds:int)->str:
+    def create_covenant(self,service_name:str,service_url:str,capacity_ceiling_units:int,min_headroom_bps:int,availability_target_bps:int,maintenance_notice_seconds:int,max_maintenance_seconds:int,admission_sources_json:str,source_registry_json:str,evidence_policy:str,exceptions_json:str,challenge_window_seconds:int)->str:
         service_name=_text(service_name,"service name",120,3);service_url=_https(service_url,"service URL")
         if not isinstance(capacity_ceiling_units,int) or capacity_ceiling_units<=0:raise gl.vm.UserError("[EXPECTED] capacity ceiling must be positive")
         if not isinstance(min_headroom_bps,int) or not 0<=min_headroom_bps<=5000:raise gl.vm.UserError("[EXPECTED] min_headroom_bps must be 0..5000")
         if not isinstance(availability_target_bps,int) or not 1<=availability_target_bps<=10000:raise gl.vm.UserError("[EXPECTED] availability target must be 1..10000")
         if not isinstance(maintenance_notice_seconds,int) or maintenance_notice_seconds<0 or maintenance_notice_seconds>14*86400:raise gl.vm.UserError("[EXPECTED] invalid maintenance notice")
         if not isinstance(max_maintenance_seconds,int) or max_maintenance_seconds<=0 or max_maintenance_seconds>86400:raise gl.vm.UserError("[EXPECTED] invalid maintenance duration")
-        sources=_admission_sources(admission_sources_json,service_url);policy=_text(evidence_policy,"evidence policy",2000,12);exceptions=_exceptions(exceptions_json)
+        sources=_admission_sources(admission_sources_json,service_url);registry=_source_registry(source_registry_json,service_url);_authorize_sources(registry,sources,ADMISSION_SOURCE_KINDS);policy=_text(evidence_policy,"evidence policy",2000,12);exceptions=_exceptions(exceptions_json)
         if not isinstance(challenge_window_seconds,int) or not CHALLENGE_MIN<=challenge_window_seconds<=CHALLENGE_MAX:raise gl.vm.UserError("[EXPECTED] invalid challenge window")
         bond=int(gl.message.value)
         if not MIN_PROVIDER_BOND<=bond<=MAX_PROVIDER_BOND:raise gl.vm.UserError("[EXPECTED] provider bond must be 0.01..1000 GEN")
-        cid=f"hr-cv-{int(self.next_covenant)}";self.next_covenant=u256(int(self.next_covenant)+1);provider=_addr(gl.message.sender_address);frozen={"service_name":service_name,"service_url":service_url,"capacity_ceiling_units":capacity_ceiling_units,"min_headroom_bps":min_headroom_bps,"availability_target_bps":availability_target_bps,"maintenance_notice_seconds":maintenance_notice_seconds,"max_maintenance_seconds":max_maintenance_seconds,"admission_sources":sources,"source_policy":{"service_origin":_origin(service_url,"service"),"admission_origins":sorted(set(x["origin"] for x in sources)),"independent_probe_origins":sorted(set(x["origin"] for x in sources if x["kind"]=="INDEPENDENT_PROBE")),"change_origin_rule":"HTTPS host frozen per change proposal; redirect destination is not exposed by GenLayer render and is not claimed as verified","evidence_classes":{"admission":"at least two distinct HTTPS origins and source kinds; independent probe origin differs from service origin","measurement":"at least two distinct HTTPS origins and source kinds; independent probe differs from service origin","change":"proposal freezes one HTTPS evidence origin distinct from service/admission origins","exception":"sources use distinct HTTPS origins and differ from service/admission origins","challenge":"counter-evidence origin differs from all original case origins and service origin"},"redirect_rule":"GenLayer web.render does not expose redirect destinations; origin claims cover submitted HTTPS URLs only and redirected responses are not asserted to be independently hosted"},"evidence_policy":policy,"exceptions":exceptions}
+        cid=f"hr-cv-{int(self.next_covenant)}";self.next_covenant=u256(int(self.next_covenant)+1);provider=_addr(gl.message.sender_address);frozen={"service_name":service_name,"service_url":service_url,"capacity_ceiling_units":capacity_ceiling_units,"min_headroom_bps":min_headroom_bps,"availability_target_bps":availability_target_bps,"maintenance_notice_seconds":maintenance_notice_seconds,"max_maintenance_seconds":max_maintenance_seconds,"admission_sources":sources,"source_policy":{"registry":registry,"provider_controlled_origins":sorted(set([_origin(service_url,"service")]+[x["origin"] for x in registry if x["kind"] in ("PROVIDER_STATUS","CAPACITY_REPORT")])),"service_origin":_origin(service_url,"service"),"admission_origins":sorted(set(x["origin"] for x in sources)),"independent_probe_origins":sorted(set(x["origin"] for x in sources if x["kind"]=="INDEPENDENT_PROBE")),"change_origin_rule":"CHANGE_NOTICE origin/class frozen at covenant creation; redirect destination is not exposed by GenLayer render and is not claimed as verified","evidence_classes":{"admission":"at least two distinct HTTPS origins and source kinds; independent probe origin differs from service origin","measurement":"at least two distinct HTTPS origins and source kinds; independent probe differs from service origin","change":"proposal freezes one HTTPS evidence origin distinct from service/admission origins","exception":"source origin and declared class must match the frozen covenant registry; duplicate origins are rejected","challenge":"CHALLENGE_COUNTER_EVIDENCE origin is frozen by covenant; counter-evidence differs from original case origins"},"redirect_rule":"GenLayer web.render does not expose redirect destinations; origin claims cover submitted HTTPS URLs only and redirected responses are not asserted to be independently hosted"},"evidence_policy":policy,"exceptions":exceptions}
         cv={"id":cid,"provider":provider,**frozen,"spec_hash":_hash(_json(frozen)),"bond_balance_atto":str(bond),"bond_initial_atto":str(bond),"reserved_units":0,"reserved_liability_atto":"0","active_reservations":0,"active_reservation_ids":[],"reservation_count":0,"change_count":0,"incident_count":0,"status":"ACTIVE","challenge_window_seconds":str(challenge_window_seconds),"created_at":str(_now())}
         self._savecv(cv);self.covenant_ids.append(cid);self.total_deposited=u256(int(self.total_deposited)+bond);self.covenant_escrow=u256(int(self.covenant_escrow)+bond);return cid
 
@@ -239,9 +268,12 @@ class Headroom(gl.Contract):
         if starts_at<now+FORMATION_LEAD_SECONDS or ends_at<=starts_at+1800 or ends_at>now+90*86400:raise gl.vm.UserError("[EXPECTED] invalid reservation window")
         if cv["active_reservations"]>=MAX_ACTIVE:raise gl.vm.UserError("[EXPECTED] active reservation cap reached")
         rid=f"hr-r-{int(self.next_reservation)}";self.next_reservation=u256(int(self.next_reservation)+1);customer=_addr(gl.message.sender_address);safe_capacity=int(cv["capacity_ceiling_units"])*(10000-int(cv["min_headroom_bps"]))//10000;capacity_ok=int(cv["reserved_units"])+requested_units<=safe_capacity;liability_ok=int(cv["reserved_liability_atto"])+max_credit_atto<=int(cv["bond_balance_atto"])
-        status="PENDING_ADMISSION"
-        r={"id":rid,"covenant_id":covenant_id,"customer":customer,"requested_units":requested_units,"max_credit_atto":str(max_credit_atto),"starts_at":str(starts_at),"ends_at":str(ends_at),"workload_description":_text(workload_description,"workload description",1200,8),"capacity_precheck":capacity_ok,"liability_precheck":liability_ok,"status":status,"risk_state":"","admission_basis":"","admission_hash":"","reservation_case_hash":_hash(_json({"spec_hash":cv["spec_hash"],"reservation":rid,"starts_at":str(starts_at),"ends_at":str(ends_at),"workload":workload_description,"requested_units":requested_units,"max_credit_atto":str(max_credit_atto),"sources":cv["admission_sources"]})),"incident_id":"","created_at":str(now)}
-        self._saver(r);self.reservation_ids.append(rid);self._append_page(self.reservation_pages,covenant_id,int(cv["reservation_count"]),rid);cv["reservation_count"]+=1;self._savecv(cv);return rid
+        status="PENDING_ADMISSION" if capacity_ok and liability_ok else "DENIED_DETERMINISTIC"
+        denial_basis="" if capacity_ok and liability_ok else "; ".join(x for x,ok in (("capacity headroom failure",capacity_ok),("collateral/liability headroom failure",liability_ok)) if not ok)
+        r={"id":rid,"covenant_id":covenant_id,"customer":customer,"requested_units":requested_units,"max_credit_atto":str(max_credit_atto),"starts_at":str(starts_at),"ends_at":str(ends_at),"workload_description":_text(workload_description,"workload description",1200,8),"capacity_precheck":capacity_ok,"liability_precheck":liability_ok,"status":status,"risk_state":"" if status=="PENDING_ADMISSION" else "RED","admission_basis":denial_basis,"admission_hash":"","reservation_case_hash":_hash(_json({"spec_hash":cv["spec_hash"],"reservation":rid,"starts_at":str(starts_at),"ends_at":str(ends_at),"workload":workload_description,"requested_units":requested_units,"max_credit_atto":str(max_credit_atto),"sources":cv["admission_sources"]})),"incident_id":"","created_at":str(now)}
+        self._saver(r);self.reservation_ids.append(rid);self._append_page(self.reservation_pages,covenant_id,int(cv["reservation_count"]),rid);cv["reservation_count"]+=1;self._savecv(cv)
+        if status=="DENIED_DETERMINISTIC":self.prevented=u256(int(self.prevented)+1)
+        return rid
 
     @gl.public.write
     def review_reservation(self,reservation_id:str)->dict:
@@ -287,7 +319,7 @@ class Headroom(gl.Contract):
         if cv["status"]!="ACTIVE" or _addr(gl.message.sender_address)!=cv["provider"]:raise gl.vm.UserError("[EXPECTED] only active provider may propose change")
         now=_now()
         if notice_posted_at>now or window_start<=now or window_end<=window_start:raise gl.vm.UserError("[EXPECTED] change notice must be historical and window strictly future")
-        evidence_url=_https(evidence_url,"change evidence");evidence_origin=_origin(evidence_url,"change evidence")
+        evidence_url=_https(evidence_url,"change evidence");evidence_origin=_authorize_url(cv["source_policy"]["registry"],evidence_url,"CHANGE_NOTICE")
         if evidence_origin==cv["source_policy"]["service_origin"] or evidence_origin in cv["source_policy"]["admission_origins"]:raise gl.vm.UserError("[EXPECTED] change evidence origin must be distinct from frozen service/admission origins")
         cid=f"hr-ch-{int(self.next_change)}";self.next_change=u256(int(self.next_change)+1);notice_ok=window_start-notice_posted_at>=int(cv["maintenance_notice_seconds"]);duration_ok=window_end>window_start and window_end-window_start<=int(cv["max_maintenance_seconds"])
         ch={"id":cid,"covenant_id":covenant_id,"title":_text(title,"change title",140,4),"description":_text(description,"change description",1600,10),"notice_posted_at":str(notice_posted_at),"window_start":str(window_start),"window_end":str(window_end),"evidence_url":evidence_url,"evidence_origin":evidence_origin,"notice_ok":notice_ok,"duration_ok":duration_ok,"status":"PENDING_REVIEW" if notice_ok and duration_ok else "NOT_PERMITTED_DETERMINISTIC","permit_hash":"","reviewed_at":"0","basis":"","created_at":str(now)}
@@ -338,7 +370,9 @@ class Headroom(gl.Contract):
         if not isinstance(actual_availability_bps,int) or actual_availability_bps<0 or actual_availability_bps>=int(cv["availability_target_bps"]):raise gl.vm.UserError("[EXPECTED] measured availability must miss the SLA target")
         now=_now()
         if observed_from<int(r["starts_at"]) or observed_to>int(r["ends_at"]) or observed_to<=observed_from or observed_to>now:raise gl.vm.UserError("[EXPECTED] incident must fit reservation window and cannot be future")
-        iid=f"hr-i-{int(self.next_incident)}";self.next_incident=u256(int(self.next_incident)+1);i={"id":iid,"reservation_id":reservation_id,"covenant_id":r["covenant_id"],"claimed_actual_availability_bps":str(actual_availability_bps),"actual_availability_bps":str(actual_availability_bps),"observed_from":str(observed_from),"observed_to":str(observed_to),"measurement_evidence":_measurement_sources(measurement_evidence_json,cv["service_url"]),"measurement_case_hash":_hash(_json({"covenant":cv["spec_hash"],"reservation":r["id"],"from":str(observed_from),"to":str(observed_to),"sources":_measurement_sources(measurement_evidence_json,cv["service_url"])})),"measurement_basis":"","exception_code":"","exception_evidence":[],"change_id":"","challenge_case_hash":"","status":"MEASUREMENT_PENDING","examination":{},"liability_result":"","liable_bps":"10000","basis":"","challenge":"","challenge_deadline":"0","payout_atto":"0","opened_at":str(_now()),"response_deadline":"0","resolution_deadline":"0","measurement_deadline":"0"};self._savei(i);self.incident_ids.append(iid);self._append_page(self.incident_pages,r["covenant_id"],int(cv["incident_count"]),iid);cv["incident_count"]+=1;self._savecv(cv);r["incident_id"]=iid;self._saver(r);return iid
+        iid=f"hr-i-{int(self.next_incident)}";self.next_incident=u256(int(self.next_incident)+1);i={"id":iid,"reservation_id":reservation_id,"covenant_id":r["covenant_id"],"claimed_actual_availability_bps":str(actual_availability_bps),"actual_availability_bps":str(actual_availability_bps),"observed_from":str(observed_from),"observed_to":str(observed_to),"measurement_evidence":_measurement_sources(measurement_evidence_json,cv["service_url"]),"measurement_case_hash":_hash(_json({"covenant":cv["spec_hash"],"reservation":r["id"],"from":str(observed_from),"to":str(observed_to),"sources":_measurement_sources(measurement_evidence_json,cv["service_url"])})),"measurement_basis":"","exception_code":"","exception_evidence":[],"change_id":"","challenge_case_hash":"","status":"MEASUREMENT_PENDING","examination":{},"liability_result":"","liable_bps":"10000","basis":"","challenge":"","challenge_deadline":"0","payout_atto":"0","opened_at":str(_now()),"response_deadline":"0","resolution_deadline":"0","measurement_deadline":"0"};_authorize_sources(cv["source_policy"]["registry"],i["measurement_evidence"],MEASUREMENT_SOURCE_KINDS)
+        if any(x["kind"]=="INDEPENDENT_PROBE" and x["origin"] in cv["source_policy"]["provider_controlled_origins"] for x in i["measurement_evidence"]):raise gl.vm.UserError("[EXPECTED] provider-controlled origin cannot be an independent probe")
+        self._savei(i);self.incident_ids.append(iid);self._append_page(self.incident_pages,r["covenant_id"],int(cv["incident_count"]),iid);cv["incident_count"]+=1;self._savecv(cv);r["incident_id"]=iid;self._saver(r);return iid
 
     @gl.public.write
     def verify_incident_measurement(self,incident_id:str)->dict:
@@ -389,7 +423,7 @@ class Headroom(gl.Contract):
             ch=self._chg(change_id);i["permitted_change"]=ch
             if ch["covenant_id"]!=cv["id"] or ch["status"]!="PERMITTED" or ch["permit_hash"]=="" or int(ch["reviewed_at"])>=int(ch["window_start"]) or int(ch["window_start"])>=int(i["observed_to"]) or int(ch["window_end"])<=int(i["observed_from"]):raise gl.vm.UserError("[EXPECTED] referenced permit does not match this covenant and incident timing")
         elif change_id:raise gl.vm.UserError("[EXPECTED] change_id is not allowed for this exception")
-        exception_sources=_sources(exception_evidence_json,1);blocked_origins=set(cv["source_policy"]["admission_origins"]+[cv["source_policy"]["service_origin"]]+[x["origin"] for x in i["measurement_evidence"]])
+        exception_sources=_sources(exception_evidence_json,1);_authorize_sources(cv["source_policy"]["registry"],exception_sources,EXCEPTION_SOURCE_KINDS);blocked_origins=set(cv["source_policy"]["admission_origins"]+[cv["source_policy"]["service_origin"]]+[x["origin"] for x in i["measurement_evidence"]])
         if any(x["origin"] in blocked_origins for x in exception_sources):raise gl.vm.UserError("[EXPECTED] exception evidence origin duplicates service/admission/measurement evidence")
         if clause["requires_change_permit"] and i["permitted_change"]["evidence_origin"] in blocked_origins|set(x["origin"] for x in exception_sources):raise gl.vm.UserError("[EXPECTED] permitted change evidence origin is not independent")
         i["exception_code"]=code;i["exception_evidence"]=exception_sources;i["change_id"]=change_id;i["status"]="EXCEPTION_CLAIMED";i["incident_case_hash"]=_hash(_json({"covenant":cv["spec_hash"],"incident":i["id"],"reservation":i["reservation_id"],"exception_code":code,"observed_from":i["observed_from"],"observed_to":i["observed_to"],"sources":i["measurement_evidence"]+i["exception_evidence"],"permit_hash":i.get("permitted_change",{}).get("permit_hash","")}));self._savei(i)
@@ -438,6 +472,7 @@ class Headroom(gl.Contract):
         if int(gl.message.value)!=bond:raise gl.vm.UserError("[EXPECTED] exact challenge bond required")
         challenge_text=_text(challenge_text,"challenge",1400,10);evidence_url=_https(evidence_url,"challenge evidence");origin=_origin(evidence_url,"challenge evidence")
         original_sources=i["measurement_evidence"]+i["exception_evidence"]+([{"origin":i["permitted_change"]["evidence_origin"]}] if i.get("permitted_change") else [])
+        _authorize_url(cv["source_policy"]["registry"],evidence_url,"CHALLENGE_COUNTER_EVIDENCE")
         if origin==cv["source_policy"]["service_origin"] or origin in set(x["origin"] for x in original_sources):raise gl.vm.UserError("[EXPECTED] challenge evidence origin must be distinct from original case evidence")
         clause=next(x for x in cv["exceptions"] if x["code"]==i["exception_code"])
         challenge_inputs={"spec_hash":cv["spec_hash"],"incident_id":i["id"],"reservation":{"id":r["id"],"workload":r["workload_description"],"units":r["requested_units"],"starts_at":r["starts_at"],"ends_at":r["ends_at"]},"measurement_case_hash":i.get("measurement_case_hash",""),"incident_case_hash":i.get("incident_case_hash",""),"original_examination":i["examination"],"clause":clause,"permitted_change":i.get("permitted_change",{}),"challenger":who,"challenge_text":challenge_text,"counter_evidence":{"url":evidence_url,"origin":origin}}
