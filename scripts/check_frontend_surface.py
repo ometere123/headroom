@@ -5,7 +5,7 @@ This is not a Next.js build. It prevents accidental handoff regressions before d
 from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 front = root / "frontend"
-required_routes = ['app/page.tsx', 'app/covenants/page.tsx', 'app/covenants/[id]/page.tsx', 'app/open/page.tsx', 'app/account/page.tsx', 'app/protocol/page.tsx']
+required_routes = ['app/page.tsx', 'app/control/page.tsx', 'app/services/page.tsx', 'app/services/new/page.tsx', 'app/services/[id]/page.tsx', 'app/admissions/page.tsx', 'app/changes/page.tsx', 'app/incidents/page.tsx', 'app/settlements/page.tsx', 'app/protocol/page.tsx']
 required_actions = ['request_reservation', 'review_reservation', 'propose_change', 'review_change', 'open_incident', 'verify_incident_measurement', 'claim_exception', 'examine_incident', 'judge_liability', 'challenge_liability', 'resolve_challenge', 'finalize_incident', 'withdraw_credit']
 failures=[]
 for rel in required_routes:
@@ -25,7 +25,7 @@ for required in ('writeContract','waitForTransactionReceipt','ExecutionResult.FI
     if required not in contract: failures.append("missing finalized GenLayer integration behavior: " + required)
 for required in ('ExecutionResult.FINISHED_WITH_RETURN', 'BigInt(whole)*10n**18n'):
     if required not in contract: failures.append("missing verified GenLayer result or exact decimal parser: " + required)
-for forbidden in ('wallet_getSnaps','wallet_requestSnaps','WalletConnect','Privy'):
+for forbidden in ('61997','studio-dev','wallet_getSnaps','wallet_requestSnaps','WalletConnect','Privy'):
     if forbidden in all_source: failures.append("forbidden wallet path: " + forbidden)
 if failures:
     print("HEADROOM_FRONTEND_SURFACE_CHECK=FAIL")

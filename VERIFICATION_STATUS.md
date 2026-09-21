@@ -13,9 +13,9 @@ Record the results for the exact release commit here and in [review evidence](do
 - Direct Mode: PASS, 54 passed (`genlayer-test==0.29.2`, `genlayer-py==0.16.3`).
 - `check_release.py`, `check_contract_patterns.py`, `check_frontend_surface.py`: PASS.
 - Frontend SDK: exact `genlayer-js==1.1.8`; `npm run typecheck` and `npm run build`: PASS.
-- GitHub Actions: pending candidate push.
-- Vercel Production: existing project linked; four required Production variables confirmed; production deploy pending.
+- GitHub Actions on pushed candidate `399eef9ddbc57a55cebb310357279e213ab53ab5`: PASS, [run 35652087105](https://github.com/ometere123/headroom/actions/runs/35652087105). A follow-up formatting/test-smoke change is being verified before final push.
+- Vercel Production: existing project linked; four required Production variables confirmed; deployment READY at https://the-headroom.vercel.app/ and browser walkthrough completed for routes, live reads, wallet connection and chain state.
 
 ## Live protocol evidence
 
-The deployment is verified. Covenant creation and subsequent protocol operations require a wallet signature from the user. Until those transactions are personally approved and successfully finalized, this repository makes no live claim for semantic admission, prevention, change preflight, incident measurement, exception examination, liability, challenge, settlement, or withdrawal.
+The deployment is verified. Covenant creation and subsequent protocol operations require a wallet signature from the user, and the provider-operated service/evidence origins have not yet been supplied. Until those inputs exist and transactions are personally approved and successfully finalized, this repository makes no live claim for semantic admission, prevention, change preflight, incident measurement, exception examination, liability, challenge, settlement, or withdrawal.

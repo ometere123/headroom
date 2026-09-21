@@ -1,6 +1,6 @@
 from pathlib import Path
 root = Path(__file__).resolve().parents[1]
-forbidden = ["61997", "studio-dev.genlayer.com", "wallet_getSnaps", "wallet_requestSnaps", "WalletConnect", "Privy"]
+forbidden = ["61997", "studio-dev", "wallet_getSnaps", "wallet_requestSnaps", "WalletConnect", "Privy"]
 scan = [root / "contracts", root / "frontend" / "app", root / "frontend" / "components", root / "frontend" / "lib", root / "deploy", root / "gltest.config.yaml"]
 failures=[]
 for entry in scan:

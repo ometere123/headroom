@@ -48,7 +48,7 @@ The verified initial deployed response is:
 
 ## Toolchain and release checks
 
-Record final candidate evidence here after checks run on the pushed release commit:
+Release evidence for the current candidate is recorded below. Re-run checks after any source change.
 
 | Check | Result |
 | --- | --- |
@@ -61,17 +61,18 @@ Record final candidate evidence here after checks run on the pushed release comm
 | `check_frontend_surface.py` | PASS; 6 required route patterns and 13 protocol actions checked |
 | Frontend SDK | exact `genlayer-js==1.1.8` |
 | Frontend typecheck/build | PASS; Next.js production build generated all routes |
-| GitHub Actions | pending release commit |
-| Vercel | existing project `headroom`, root `frontend`; Production vars configured; production deployment pending |
+| GitHub Actions | PASS, [run 35652087105](https://github.com/ometere123/headroom/actions/runs/35652087105), commit `399eef9ddbc57a55cebb310357279e213ab53ab5` |
+| Vercel | existing project `headroom`, root `frontend`; four Production variables configured; deployment READY at [production URL](https://the-headroom.vercel.app/) |
+| Browser walkthrough | Production home and operational routes loaded; live contract reads, wallet connection and UTC preference exercised; no write transaction submitted |
 
 ## Chronological live transaction evidence
 
-Only the deployment transaction exists at the time this evidence was written. Empty lifecycle cells are intentionally marked NOT EXECUTED; they are not simulated or inferred. Update rows with transaction hashes only after user-approved wallet operations finalize and execute successfully.
+The deployment transaction is the only protocol transaction in this record. Empty lifecycle cells are intentionally marked NOT EXECUTED; they are not simulated or inferred. Update rows with transaction hashes only after user-approved wallet operations finalize and execute successfully.
 
 | Action | Method | Transaction | Finalized? | Execution success? | Result | Evidence / state |
 | --- | --- | --- | --- | --- | --- | --- |
 | Deploy canonical Headroom | Deployment | [`0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`](https://explorer-studio.genlayer.com/tx/0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929) | Yes | Yes | Contract created at canonical address | [Contract explorer](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C); source hash above |
-| Create/bond covenant | `create_covenant` | NOT EXECUTED | — | — | Awaiting user wallet approval | No covenant exists in initial deployed state |
+| Create/bond covenant | `create_covenant` | NOT EXECUTED | — | — | Waiting for a service operated by the provider and relevant truthful evidence | No covenant exists in initial deployed state |
 | Deterministic prevention | `request_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Must inspect post-state and `prevented` count |
 | Semantic prevention | `review_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Requires truthful, currently unsafe evidence |
 | SAFE admission | `request_reservation` + `review_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Must record actual reservation and frozen evidence |
@@ -90,3 +91,9 @@ Only the deployment transaction exists at the time this evidence was written. Em
 Research retrieved the GitHub public status API (`https://www.githubstatus.com/api/v2/summary.json`) at 2026-09-21 19:18:58 UTC. It reported all listed components operational, no incidents or scheduled maintenance. Checkly’s public GitHub monitor (`https://www.checklyhq.com/availability/github/`) reported GitHub up when crawled five days earlier and its page describes its own two-region 10-minute HTTPS probe of `https://api.github.com`; the observations are not the same-time window, so it is only a candidate independent source. The two operators and origins are distinct. These sources have **not** been submitted to the contract or represented as evidence of a live decision. Their current health evidence does not support a truthful semantic UNSAFE test or an incident claim, and their use to promise service operated by someone else would be inappropriate. Select a service actually operated by the provider and recheck freshness before any wallet transaction.
 
 No controlled outage, fabricated status page, edited evidence timestamp, or historical outage reused for a new reservation is claimed.
+
+## Production deployment and browser verification
+
+The existing Vercel project (`headroom`, root directory `frontend`) has the four required Production variables configured for the canonical contract and Studionet. Production is publicly reachable at [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/). Its deployment for source commit `399eef9ddbc57a55cebb310357279e213ab53ab5` is READY. The production interface was opened in a browser; home, control, service, admission, change, incident, settlement and protocol routes were exercised. The injected EIP-1193 wallet connected and chain reads returned the deployed state after load. No protocol write was sent.
+
+The read-only integration smoke path uses `genlayer-js==1.1.8` unsigned `readContract`, because `genlayer-py==0.16.3` currently raises `No account provided` on views. The SDK read was verified against the canonical deployment; full Python/Node cross-runtime smoke orchestration remains environment-dependent and is not reported as a passing integration-suite run.

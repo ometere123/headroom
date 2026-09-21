@@ -8,11 +8,12 @@ configuration assertion proves network integration.
 """
 
 import os
+import rlp
+import requests
+from eth_utils import to_hex
+from genlayer_py.abi.calldata import encode, decode
 
 import pytest
-
-from genlayer_py import create_client
-from genlayer_py.chains import studionet
 
 EXPECTED_RPC = "https://studio.genlayer.com/api"
 EXPECTED_CHAIN_ID = 61999
@@ -24,15 +25,31 @@ def test_canonical_deployment_reports_studionet_and_balanced_accounting():
     if not address:
         pytest.skip("set HEADROOM_CONTRACT to the finalized Studionet deployment address")
 
-    assert studionet.id == EXPECTED_CHAIN_ID
-    assert studionet.rpc_urls["default"]["http"][0] == EXPECTED_RPC
-
-    client = create_client(chain=studionet)
-    stats = client.read_contract(
-        address=address,
-        function_name="get_stats",
-        args=[],
+    # genlayer-py 0.16.3 blocks unsigned views before RPC. Issue the same
+    # read-only gen_call request directly, with the zero address used by
+    # genlayer-js 1.1.8 when no wallet account is connected.
+    calldata = encode({"method": "get_stats"})
+    serialized = to_hex(rlp.encode([calldata, b"\x00"]))
+    response = requests.post(
+        EXPECTED_RPC,
+        json={
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "gen_call",
+            "params": [{
+                "type": "read",
+                "to": address,
+                "from": "0x0000000000000000000000000000000000000000",
+                "data": serialized,
+                "transaction_hash_variant": "latest-final",
+            }],
+        },
+        timeout=60,
     )
+    response.raise_for_status()
+    payload = response.json()
+    assert "error" not in payload, payload.get("error")
+    stats = decode(bytes.fromhex(payload["result"].removeprefix("0x")))
 
     assert stats["network"] == "Studionet"
     assert stats["chain_id"] == str(EXPECTED_CHAIN_ID)

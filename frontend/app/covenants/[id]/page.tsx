@@ -33,7 +33,7 @@ export default function CovenantDetail(){
   async function doTx(name:string,args:any[]=[],value?:bigint){try{await transact(name,args,value)}catch(e:any){setError(e?.message||String(e));setPhase("")}}
   if(!cv)return <section className="shell page"><div className="kicker">control room</div><h1>loading covenant…</h1>{error&&<div className="tx tx-error">{error}</div>}</section>;
 
-  const cap=Math.max(1,Number(cv.capacity_ceiling_units));const committed=Number(cv.reserved_units);const capPct=Math.min(100,Math.round(committed*100/cap));const bond=Math.max(1,Number(cv.bond_balance_atto));const liab=Number(cv.reserved_liability_atto);const liabPct=Math.min(100,Math.round(liab*100/bond));const safeCap=Math.floor(cap*(10000-Number(cv.min_headroom_bps))/10000);
+  const cap=Math.max(1,Number(cv.capacity_ceiling_units));const committed=Number(cv.reserved_units);const capPct=Math.min(100,Math.round(committed*100/cap));const bond=BigInt(cv.bond_balance_atto||0);const liab=BigInt(cv.reserved_liability_atto||0);const liabPct=bond>0n?Number(liab*10000n/bond)/100:0;const safeCap=Math.floor(cap*(10000-Number(cv.min_headroom_bps))/10000);
   const latestIncident=incidents.length?incidents[incidents.length-1]:null;
 
   return <section className="shell page">

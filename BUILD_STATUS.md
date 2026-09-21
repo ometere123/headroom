@@ -22,7 +22,7 @@ The app uses an infrastructure operations shell with a persistent operations rai
 | Static release/pattern/frontend checks | PASS |
 | Frontend typecheck/build | PASS |
 | Vercel | Existing `headroom` project, root `frontend`; Production env configured for canonical contract and Studionet |
-| Production deploy/browser walkthrough | Pending production deploy and browser review |
+| Production deploy/browser walkthrough | READY; existing Vercel project deployed to https://the-headroom.vercel.app/ and browser routes/live reads/wallet connection exercised |
 | Live contract writes | Awaiting the user’s wallet approval when a real operation is prepared |
 
-The canonical contract currently has no covenants or lifecycle records. No incident, semantic decision, admission, settlement, or withdrawal is claimed until a real finalized transaction establishes it.
+The canonical contract currently has no covenants or lifecycle records. No incident, semantic decision, admission, settlement, or withdrawal is claimed until a real finalized transaction establishes it. Current pushed source commit: `399eef9ddbc57a55cebb310357279e213ab53ab5`; CI run [35652087105](https://github.com/ometere123/headroom/actions/runs/35652087105) is green. A subsequent minor GEN formatting precision fix is being verified before final push.
