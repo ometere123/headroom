@@ -30,6 +30,8 @@ HEADROOM uses prevention before adjudication. Deterministic capacity/collateral 
 - **LLM chooses a convenient payout:** impossible in normal settlement; liability bps are derived from structured facts by contract code, then applied to reserved credit deterministically.
 - **Liveness griefing:** provider-response, evidence-retry and challenge-resolution deadlines provide bounded exits.
 
-## Release proof still required
+## Live proof status
 
-The canonical demo should visibly prove both halves of the protocol: one prevented promise/change and one admitted promise that later enters verified incident adjudication and deterministic GEN settlement. Record `get_stats()` after the flow and keep the accounting invariant true.
+The canonical contract deployment and source/schema match are verified; the deployed starting state has no covenants or lifecycle transactions. Real covenant, prevention, admission, change preflight, and incident settlement actions require user-approved wallet transactions and truthful evidence. Do not claim any until its transaction is finalized with successful execution and post-state is re-read. See `docs/REVIEW_EVIDENCE.md` for the chronological record.
+
+Frontend validation is a convenience boundary, not authority. The contract remains authoritative for origin/class policy, timing, headroom, collateral, state transitions and accounting. Human source and exception builders serialize to the existing contract arguments without changing its trust model.

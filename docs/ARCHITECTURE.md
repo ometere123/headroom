@@ -138,3 +138,11 @@ A provider can close the covenant and recover its remaining bond only when there
 ## Frontend boundary
 
 HEADROOM is the flagship UI: a promise-surface control room rather than a generic dashboard. Capacity and liability gauges explain prevention; change-control panels explain permitted operations; incident timelines explain exactly which semantic facts GenLayer established. Wallet integration is generic injected EIP-1193 only, finalized reads are explicit, and finalized-but-failed executions are treated as errors.
+
+## Frontend information architecture
+
+The public landing page explains the mechanism and reads live contract totals without substituting sample values. The internal app uses a fixed Studionet/contract status strip and an operations rail. `/control` is the live operational overview; `/services` is a capacity and liability service field; `/services/new` is a covenant formation wizard; `/services/[id]` is the covenant workspace; `/admissions`, `/changes`, and `/incidents` are cross-service boards; `/incidents/[id]` resolves to its service’s forensic workspace; `/settlements` is the wallet-credit withdrawal surface; and `/protocol` explains the trust boundary. `/covenants`, `/open`, and `/account` redirect to the corresponding service/new-service/settlement route.
+
+Human times use explicit UTC or UTC+1 and date-time controls. Duration fields use minutes, hours, or days. The frontend converts those values to Unix seconds only at the contract call boundary. Evidence rows, origin/class registry entries, and exception clauses are typed browser state serialized at the call boundary; raw JSON appears only as an advanced read-only/copyable representation.
+
+The actual contract argument schema is unchanged. The landing/control/service/settlement surfaces read from the canonical address. Empty state means the chain returned no records, and read failure is surfaced instead of replaced with synthetic state.

@@ -1,24 +1,22 @@
-# HEADROOM live demo
+# HEADROOM Live Demo Protocol
 
-The canonical release demo must prove the real trust boundary, not merely show screens.
+HEADROOM must be demonstrated with truthful evidence and real wallet-approved transactions. The deployed Studionet contract currently has no covenants or lifecycle records.
 
-## Positive path
+## Evidence candidates
 
-Bond a covenant, first demonstrate a deterministic capacity or collateral denial, then admit a genuinely safe reservation using live health/capacity evidence. Preflight one operational change. For an active reservation, open a genuine measured miss, independently verify the measurement, invoke a frozen exception, reconstruct incident facts, run the deterministic liability gate, resolve or wait out challenge, finalize the reserved service credit and withdraw it.
+- GitHub status API: `https://www.githubstatus.com/api/v2/summary.json` — provider-operated status, `PROVIDER_STATUS`.
+- Checkly GitHub availability: `https://www.checklyhq.com/availability/github/` — separate synthetic-monitor operator, candidate `INDEPENDENT_PROBE`.
 
-## Negative / fail-closed proof
+These are research candidates, not frozen contract evidence and not proof of an outage. Recheck that they are currently reachable and contain evidence relevant to the exact service before forming a covenant. An old incident cannot be moved into a newly created SLA window.
 
-Also prove at least one prevention/fail-closed path: deterministic admission denial, semantic `UNSAFE`, `SOURCE_UNAVAILABLE`, unverified measurement dismissal, unpermitted change, missing required permit, source conflict, or default breach after provider silence.
+## Safe execution sequence
 
-## Evidence to record for every write
+1. Inspect sources and authorize each HTTPS origin for its real evidence class.
+2. Ask the provider wallet to approve `create_covenant` and fund the bond.
+3. Demonstrate deterministic refusal with an impossible request; verify it reserves nothing and increments `prevented`.
+4. Use a distinct-source request supported by current, healthy evidence; obtain wallet approval, run consensus, and verify state after refresh.
+5. Exercise change preflight with a real future notice and evidence before the window.
+6. Run the post-failure path only if a genuine measured miss occurs within the active reservation window.
+7. Re-fetch final state, settlement certificate, and accounting invariant after each completed step.
 
-- exact canonical contract address;
-- transaction hash;
-- FINALIZED receipt **and** successful execution result;
-- relevant finalized state after the write;
-- explorer link where available;
-- external evidence URLs actually used by consensus.
-
-After the last economic action, record `get_stats()` and show the accounting invariant remains balanced.
-
-Do not fabricate public evidence, change historical dates, weaken source-family requirements, bypass a challenge window, or loosen a frozen rule just to manufacture a successful demonstration. If the chosen example cannot truthfully exercise the positive path, choose a better example.
+Do not create synthetic history, label provider-controlled evidence independent, fabricate an outage, or infer a successful execution from transaction finality alone. See [review evidence](REVIEW_EVIDENCE.md) for actual transactions; unexecuted paths are marked explicitly.

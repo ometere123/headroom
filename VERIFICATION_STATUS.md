@@ -1,18 +1,21 @@
-# Verification status
+# Verification Status
 
-## Passed gates
+## Canonical contract
 
-- Source-derived contract surface: 10 public views and 21 public writes. Direct Mode suite: 54 tests. Run `python scripts/update_verification_facts.py` to refresh README/reviewer count facts from the current ASTs.
-- Python 3.12 clean WSL Direct Mode environment installed `requirements.txt`; all 54 tests pass using official GenVM runner archive `v0.2.16`, which contains the contract Depends runner. `genlayer-test==0.29.2` and `genlayer-py==0.16.3` are compatible; the test package declares `genlayer-py>=0.13,<0.17`.
-- `python -m py_compile contracts/headroom.py tests/direct/*.py tests/integration/*.py`: pass.
-- `python scripts/check_genvm_lint.py`: pass with successful contract validation and only the exact, documented seven E010 warnings around custom `gl.vm.run_nondet_unsafe` leader closures/fetch helper. Raw diagnostics remain captured in `docs/genvm-lint-full-output.txt`.
-- Release, contract-pattern and frontend-surface checks: pass.
-- Frontend `npm install`, `npm run typecheck`, and `npm run build`: pass.
-- GitHub Actions on `main`: pass; see [the latest HEADROOM CI run](https://github.com/ometere123/headroom/actions/workflows/ci.yml?query=branch%3Amain).
+The deployed Studionet contract `0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C` was finalized successfully by transaction `0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`. Deployed source SHA-256 is `461fc74172e1d4a8a3e36d344280bc4e1cb22afd8ac44d9ea750138ee3954abe`, matching repository `contracts/headroom.py` at source commit `7aecd8f4312557de504de2709d04f646c102dce0`. Its schema is 10 views and 21 writes. Live `get_stats()` reports Studionet, chain 61999, balanced accounting, and no admin controls.
 
-## Pending live proof
+## Candidate checks
 
-- Real Studionet integration and independent consensus evidence.
-- Deployment, deployed source/schema comparison, complete live economic lifecycle, deployed-address frontend wiring, and public hosting.
+Record the results for the exact release commit here and in [review evidence](docs/REVIEW_EVIDENCE.md):
 
-No deployment has occurred. The release remains locked to Studionet 61999 / `https://studio.genlayer.com/api` with generic injected EIP-1193 only.
+- Python 3.12.3 compile: PASS (`contracts/headroom.py`, all direct and integration test modules).
+- GenVM validation: `genvm-linter==0.11.1rc2`; the reviewed exact seven E010 custom validator diagnostics remain the only accepted warnings.
+- Direct Mode: PASS, 54 passed (`genlayer-test==0.29.2`, `genlayer-py==0.16.3`).
+- `check_release.py`, `check_contract_patterns.py`, `check_frontend_surface.py`: PASS.
+- Frontend SDK: exact `genlayer-js==1.1.8`; `npm run typecheck` and `npm run build`: PASS.
+- GitHub Actions: pending candidate push.
+- Vercel Production: existing project linked; four required Production variables confirmed; production deploy pending.
+
+## Live protocol evidence
+
+The deployment is verified. Covenant creation and subsequent protocol operations require a wallet signature from the user. Until those transactions are personally approved and successfully finalized, this repository makes no live claim for semantic admission, prevention, change preflight, incident measurement, exception examination, liability, challenge, settlement, or withdrawal.

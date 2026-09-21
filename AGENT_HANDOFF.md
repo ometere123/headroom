@@ -1,79 +1,22 @@
-# HEADROOM final execution handoff
+# HEADROOM Release Handoff
 
-## Goal
+HEADROOM is a preventive SLA admission and enforcement protocol: deterministic capacity and collateral rules reject impossible commitments; GenLayer assesses changing public evidence before a promise or operational change is protected; the same frozen covenant governs incident facts; contract code calculates liability and settlement.
 
-Take this extracted repository from its current source-complete state to a **live, tested, deployed, reviewer-verifiable Studionet release**. This is an execution task, not a review or planning task. Preserve the protocol thesis and the existing visual identity. Do not stop at recommendations.
+## Canonical release facts
 
-## Hard release constraints
+- Studionet only: chain `61999`, RPC `https://studio.genlayer.com/api`.
+- Contract: `0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C`.
+- Deployment transaction: `0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`.
+- Deployment is FINALIZED and execution succeeded. Deployed source hash matches `contracts/headroom.py` from source commit `7aecd8f4312557de504de2709d04f646c102dce0`; schema: 10 views / 21 writes.
+- Vercel project: existing `headroom` project, root `frontend`, production domain `https://the-headroom.vercel.app/`.
+- Stable stack only: CLI 0.39.1, JS SDK 1.1.8, Python 3.12, Direct Mode `genlayer-test==0.29.2`, `genlayer-py==0.16.3`, linter `genvm-linter==0.11.1rc2`.
 
-- **Studionet only: chain 61999.**
-- RPC exactly `https://studio.genlayer.com/api`.
-- Generic injected EIP-1193 `window.ethereum` browser wallet only.
-- No 61997, Studio-dev, Snaps, WalletConnect, embedded wallet, browser private key or backend signer.
-- Keep one substantive Intelligent Contract unless a verified current GenLayer limitation requires a change.
-- Missing, unavailable, contradictory or unproven evidence must never be silently promoted into a favourable economic verdict.
-- Do not replace semantic validator replay with shape-only JSON validation.
+## Safety invariants
 
-## Product that must survive finishing
+Preserve deterministic request denials, pending requests reserving nothing, SAFE activation headroom recheck, pre-exposure formation, non-retrospective change permits, frozen evidence origin/classes, independent measurement, bounded incident facts, deterministic liability, full-case bonded challenge, and accounting conservation. Keep semantic validator replay substantive. The exact seven reviewed E010 warnings are accepted only if validation succeeds and CI confirms the same enumerated diagnostics.
 
-A preventive SLA admission and enforcement protocol: unsafe promises and unsafe changes are blocked before formation; if prevention still fails, the same frozen covenant adjudicates the incident and settles reserved liability.
+Never claim a live transaction, outage, monitor, source outcome, or economic settlement that did not happen. The user requires pausing at each production wallet approval so they can sign. Do not use a private key, CLI account signer, backend signer, or fake transaction. The initial contract state contains no covenant or protocol records.
 
-HEADROOM is the flagship. It uses the same covenant twice: before risk exists, GenLayer and deterministic collateral/capacity gates decide whether a new SLA promise or operational change may proceed; after a verified miss, the covenant becomes the incident law. The customer cannot self-create liability, the provider cannot self-excuse, and the model never invents the payout.
+## Verification and evidence
 
-Current lifecycle: `create_covenant → request_reservation → review_reservation → propose_change/review_change → open_incident → verify_incident_measurement → claim_exception → examine_incident → judge_liability → optional challenge_liability/resolve_challenge → finalize_incident (or bounded default breach) → withdraw_credit`.
-
-## Start here
-
-1. Read `README.md`, `STATIC_VERIFICATION.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`, `docs/LIVE_DEMO.md`, the entire contract and all tests.
-2. Install/use the current official GenLayer skills and Docs MCP when available; verify any GenLayer-specific API before changing it.
-3. Run `python scripts/check_release.py` and `python scripts/check_contract_patterns.py`. Any alternate network or prohibited wallet path is a release blocker.
-
-## Contract gates
-
-```bash
-pip install -r requirements.txt
-genvm-lint check contracts/headroom.py --json
-pytest tests/direct/ -v
-```
-
-Fix genuine GenVM/storage/closure/type/toolchain failures without weakening the economic or semantic rules. Keep or expand tests for exact payable checks, access control, state transitions, evidence unavailable/inconclusive states, malformed model output, substantive validator agreement/disagreement, replay/duplicate protection, bounded liveness, challenge outcomes, pull-credit withdrawal and accounting conservation.
-
-Then run the integration/real-network checks that are appropriate to current tooling. The included `tests/integration/test_studionet_smoke.py` is opt-in and must point to the final deployed address; do not mistake it for full semantic consensus proof.
-
-## Frontend gates
-
-```bash
-cd frontend
-npm install
-npm run typecheck
-npm run build
-```
-
-Preserve the current design system: **contractual operations control room: dark promise-surface console, capacity/liability block gauges, admission lanes, change-control signals and forensic incident timelines**. Do not replace it with a template dashboard, glass/gradient AI aesthetic, chatbot, or one-scroll site. Keep the hero landing page and the separate product routes `/`, `/covenants`, `/covenants/[id]`, `/open`, `/account`, `/protocol`. Verify every visible write reaches the real contract and presents signing, submitted/finalizing, finalized and readable error states.
-
-## Deployment
-
-Use the built-in Studionet network. Before deploying, explicitly verify chain ID `61999` and RPC `https://studio.genlayer.com/api`. Deploy only the exact final lint/test-passing source. Wait for FINALIZED **and** successful execution. Then inspect deployed code/schema and `get_stats()` and compare them with this repository. Record the final address, deployment transaction and source commit in `deployments/studionet.json` and `docs/REVIEW_EVIDENCE.md`.
-
-## Live proof
-
-Execute `docs/LIVE_DEMO.md` with real, stable public evidence. The positive path must reach the actual semantic decision and the native-GEN economic consequence; also prove at least one meaningful negative/fail-closed path. If the evidence cannot truthfully satisfy the positive case, change the demo case, not the protocol.
-
-## Publish and freeze
-
-Wire the exact final address into the frontend environment, build again, publish it, and retest in a clean browser with a generic injected wallet on 61999. Confirm finalized reads, writes, wrong-network recovery, explorer links and understandable failures. Remove stale addresses, stale screenshots, test-only claims and unverified language. Make CI green and leave the working tree clean.
-
-## Definition of done
-
-- linter clean;
-- all Direct Mode tests green;
-- required real-network/integration checks green;
-- production frontend typecheck/build green;
-- exact final source deployed on 61999;
-- deployed source/schema match repository;
-- public frontend points only to the canonical address;
-- live semantic consensus proven with real external evidence;
-- live native GEN economic path proven;
-- `get_stats().accounting_balanced` remains true after the demo;
-- docs contain real evidence and no stale/aspirational deployment claims;
-- CI/main/working tree green and clean.
+Run the exact release checks in README. Use the chronological table and current stats in `docs/REVIEW_EVIDENCE.md`. Evidence candidates are distinguished from evidence actually used by a covenant. Any claim of semantic admission or incident settlement requires actual Studionet consensus, a finalized transaction with successful execution, and a refreshed state read.

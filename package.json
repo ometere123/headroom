@@ -10,7 +10,7 @@
     "check:frontend-surface": "python scripts/check_frontend_surface.py"
   },
   "dependencies": {
-    "genlayer-js": "^1.1.8"
+    "genlayer-js": "1.1.8"
   },
   "devDependencies": {
     "tsx": "^4.20.6",

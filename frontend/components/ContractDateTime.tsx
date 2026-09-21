@@ -1,0 +1,4 @@
+"use client";
+import {useEffect,useState} from "react";import {DisplayZone,zonePreference,saveZonePreference} from "@/lib/time";
+export function ContractDateTime({label,value,onChange}:{label:string,value:string,onChange:(v:string)=>void}){const [zone,setZone]=useState<DisplayZone>("UTC+1");useEffect(()=>setZone(zonePreference()),[]);return <label className="field"><span>{label} ({zone})</span><input type="datetime-local" value={value} onChange={e=>onChange(e.target.value)}/></label>}
+export function TimeZoneControl(){const [zone,setZone]=useState<DisplayZone>("UTC+1");useEffect(()=>setZone(zonePreference()),[]);return <label className="zone-control"><span>TIME</span><select value={zone} onChange={e=>{const z=e.target.value as DisplayZone;setZone(z);saveZonePreference(z)}}><option>UTC+1</option><option>UTC</option></select></label>}

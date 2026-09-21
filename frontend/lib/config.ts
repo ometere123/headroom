@@ -1,7 +1,7 @@
 export const CHAIN_ID = 61999;
 export const CHAIN_HEX = "0x" + CHAIN_ID.toString(16);
 export const RPC = "https://studio.genlayer.com/api";
-export const EXPLORER = "https://explorer-studio.genlayer.com";
+export const EXPLORER = process.env.NEXT_PUBLIC_GENLAYER_EXPLORER || "https://explorer-studio.genlayer.com";
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_HEADROOM_CONTRACT || "";
 export const NETWORK = {
   chainId: CHAIN_HEX,
@@ -13,5 +13,6 @@ export const NETWORK = {
 export function assertReleaseConfig() {
   const envId = Number(process.env.NEXT_PUBLIC_GENLAYER_CHAIN_ID || CHAIN_ID);
   const envRpc = process.env.NEXT_PUBLIC_GENLAYER_RPC_URL || RPC;
-  if (envId !== CHAIN_ID || envRpc !== RPC) throw new Error("HEADROOM is locked to Studionet 61999 / studio.genlayer.com/api");
+  const envExplorer = process.env.NEXT_PUBLIC_GENLAYER_EXPLORER || EXPLORER;
+  if (envId !== CHAIN_ID || envRpc !== RPC || envExplorer !== "https://explorer-studio.genlayer.com") throw new Error("HEADROOM is locked to Studionet 61999 / stable RPC and explorer");
 }

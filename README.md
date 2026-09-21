@@ -1,50 +1,136 @@
-# HEADROOM
+<p align="center">
+  <img src="branding/headroom-logo.svg" alt="HEADROOM" width="300" />
+</p>
 
-**A preventive SLA admission and enforcement protocol.** HEADROOM establishes consensus before risk: deterministic capacity and collateral rules reject impossible promises before semantic admission, and unsafe operating changes are blocked before their windows. If prevention fails, consensus establishes incident facts and contract code computes settlement deterministically.
+# HEADROOM — Preventive SLA Admission & Enforcement
 
-HEADROOM is hard-locked to GenLayer Studionet:
+**Don’t promise what you can’t serve.** HEADROOM controls whether SLA-backed service commitments and operational exceptions may exist before risk is taken. If prevention fails, the same frozen covenant governs incident facts and deterministic settlement.
 
-- Chain ID: `61999`
-- RPC: `https://studio.genlayer.com/api`
-- Wallet: generic injected EIP-1193 through `window.ethereum`
+**Live app:** [the-headroom.vercel.app](https://the-headroom.vercel.app/) · **Protocol:** [Studionet explorer](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C)
 
-The application has no 61997/Studio-dev path, embedded signer, backend signer, browser private key, WalletConnect or Snaps integration.
+## What HEADROOM Does
 
-## Lifecycle
+A provider bonds a service covenant that freezes capacity, liability, evidence origins and classes, maintenance rules, and exception clauses. A customer requests a bounded SLA reservation. Mechanical headroom checks reject requests the provider cannot safely serve or collateralize. Only feasible requests reach GenLayer semantic admission against current public evidence. Operational changes must also pass preflight before their window begins.
 
-`create_covenant → request_reservation → review_reservation → propose_change/review_change → open_incident → verify_incident_measurement → claim_exception → examine_incident → judge_liability → optional challenge_liability/resolve_challenge → finalize_incident → withdraw_credit`
+If a service miss occurs, a customer’s typed metric cannot create liability by itself. Independent evidence must establish the miss. The provider may invoke only an exception frozen in the covenant. GenLayer reconstructs consequential facts and causation; contract code applies the frozen rule to those facts and settles native GEN from reserved liability.
 
-Reservation requests first receive deterministic capacity and collateral checks. Failed checks are stored as `DENIED_DETERMINISTIC` and never reach web/LLM admission. Pending requests hold no capacity or collateral. A SAFE semantic result activates only after a fresh headroom check.
+## Why It Exists
 
-Each covenant freezes HTTPS origins and evidence classes. A URL is accepted only when its submitted origin and declared class are authorized. Origins must be distinct where independent sources are required. GenLayer does not expose redirect destinations, so HEADROOM makes no claim about the origin of redirected content.
+The parties have conflicting incentives. Providers control capacity claims, maintenance notices, status evidence, and exception interpretation. Customers control complaints, claimed impact, and counter-evidence. Neither side should decide alone whether a new promise is safe or whether an incident is excused. HEADROOM assigns semantic evidence judgments to GenLayer validators and keeps arithmetic and accounting in contract code.
 
-Incident consensus returns bounded timestamps and structured facts. `judge_liability()` computes temporal overlap and provider liability from those facts; an LLM never selects a payout percentage. Challenges re-fetch the original evidence and apply the same deterministic liability law to corrected facts.
+## Core Invariant
 
-## Repository
+> **Consensus Before Risk. Consensus After Failure.**
 
-- `contracts/headroom.py`: single intelligent contract
-- `tests/direct/`: Direct Mode adversarial suite
-- `tests/integration/`: opt-in live Studionet smoke test
-- `frontend/`: control-room UI
-- `deploy/`: chain-locked deployment script
-- `docs/`: architecture, security, environment and reviewer evidence
+Before risk, consensus reviews admission evidence and operational change preflight after deterministic timing, capacity, and collateral gates. After a measured failure, consensus verifies the evidence, reconstructs incident facts, and checks the frozen exception. Deterministic contract logic then calculates liability, settlement, and withdrawal accounting.
 
-Source-derived facts: **609 contract lines**, **10 public views**, **21 public writes**, **54 Direct Mode tests**. These counts are computed from the current source in `scripts/update_verification_facts.py` when documentation is refreshed.
+## Protocol Lifecycle
 
-## Local gates
+| Human stage | Contract method | What happens |
+| --- | --- | --- |
+| Bond covenant | `create_covenant` | Freeze capacity, evidence policy, exception rules, and bond |
+| Request capacity | `request_reservation` | Deterministic headroom gate; denied requests reserve nothing |
+| Live admission | `review_reservation` | GenLayer checks changing service/dependency evidence; SAFE activation rechecks headroom |
+| Change preflight | `propose_change` / `review_change` | Verify notice, duration, evidence, and active SLA protection before start |
+| Open measured incident | `open_incident` / `verify_incident_measurement` | Independently verify service, interval, and measured availability |
+| Claim frozen exception | `claim_exception` / `examine_incident` | Reconstruct facts, causation, clause satisfaction, and permit match |
+| Apply liability | `judge_liability` | Deterministic overlap, liable basis points, and payout |
+| Challenge | `challenge_liability` / `resolve_challenge` | Re-fetch complete case, include counter-evidence, apply the same economic law |
+| Finalize | `finalize_incident` | Release capacity/reserve and write settlement certificate |
+| Withdraw | `withdraw_credit` | Owner-directed native GEN transfer |
 
-```bash
+## What Is Deterministic, What Uses Consensus
+
+| Decision | Mechanism |
+| --- | --- |
+| Capacity headroom and reservation counters | Deterministic contract arithmetic |
+| Bond/collateral and challenge bond | Deterministic contract arithmetic |
+| Reservation lead time, expiry, notice, duration, and permit timing | Deterministic comparisons |
+| Current service, dependency, risk, and evidence meaning | GenLayer consensus |
+| Whether change evidence matches the claimed maintenance window | GenLayer consensus plus deterministic timing gates |
+| Whether independent measurement establishes the service miss | GenLayer consensus |
+| Incident timeline, exception event, causal relationship, and clause facts | GenLayer consensus |
+| Temporal overlap, `excused_bps`, and `liable_bps` | Deterministic contract arithmetic |
+| GEN payout, escrow conservation, and settlement certificate | Deterministic contract arithmetic |
+
+GenLayer establishes facts from changing public evidence. It does not choose a payout amount or liability percentage.
+
+## Evidence Trust Model
+
+Covenant formation freezes HTTPS origin/class pairs. Later evidence may use paths under an authorized origin; each submitted URL must match both its actual parsed origin and claimed class. Required source families use distinct origins. A service/provider-controlled origin cannot claim `INDEPENDENT_PROBE`, and duplicate origins cannot count as independent sources. The current GenLayer web runtime does not expose final redirect destinations, so HEADROOM makes no claim that redirected content’s origin was verified.
+
+Admission, measurement, change, exception, and challenge packets all use the frozen policy. The UI creates contract JSON from structured source rows; reviewers can inspect serialized payloads without typing raw JSON.
+
+## Liability and Challenge
+
+GenLayer establishes bounded impact and exception timestamps and factual predicates such as service affected, event established, causation, clause satisfaction, permit match, and source conflict. The contract intersects the established intervals and calculates proven excused overlap against the measured impact duration. It derives provider liability as `10,000 - excused_bps` when every frozen exception condition holds; otherwise the exception receives no excused share. Payout is derived from the reserved maximum credit and liability basis points.
+
+A bonded challenge submits counter-evidence and re-fetches the original measurement, exception, and required permit evidence. If upheld, corrected factual fields pass through the same deterministic liability function. Bounded inconclusive/unavailable states cannot silently become a favorable decision.
+
+## Live Release
+
+| Field | Canonical value |
+| --- | --- |
+| Network | GenLayer Studionet |
+| Chain ID | `61999` |
+| RPC | `https://studio.genlayer.com/api` |
+| Explorer | [explorer-studio.genlayer.com](https://explorer-studio.genlayer.com) |
+| Contract | [`0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C`](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C) |
+| Deployment transaction | [`0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`](https://explorer-studio.genlayer.com/tx/0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929) |
+| Contract source commit | `7aecd8f4312557de504de2709d04f646c102dce0` |
+| Contract source SHA-256 | `461fc74172e1d4a8a3e36d344280bc4e1cb22afd8ac44d9ea750138ee3954abe` |
+| Frontend | [the-headroom.vercel.app](https://the-headroom.vercel.app/) |
+
+Deployment receipt is FINALIZED with successful execution. The deployed source matches `contracts/headroom.py` at the source commit above; the deployed schema exposes 31 methods (10 views and 21 writes). `get_stats()` reports Studionet / 61999, balanced accounting, and no admin controls. See [review evidence](docs/REVIEW_EVIDENCE.md) for the verified receipt and state. Live semantic admission and economic lifecycle evidence are recorded only after those actions have occurred.
+
+## Run Locally
+
+Requirements: Python 3.12.x, Node.js supported by the locked Next.js version, and npm.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+pytest tests/direct/ -v
+cd frontend
+npm install
+$env:NEXT_PUBLIC_HEADROOM_CONTRACT="0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C"
+$env:NEXT_PUBLIC_GENLAYER_CHAIN_ID="61999"
+$env:NEXT_PUBLIC_GENLAYER_RPC_URL="https://studio.genlayer.com/api"
+$env:NEXT_PUBLIC_GENLAYER_EXPLORER="https://explorer-studio.genlayer.com"
+npm run dev
+```
+
+The frontend uses `genlayer-js` **1.1.8** and generic injected EIP-1193 (`window.ethereum`). It does not use a backend signer, private-key browser wallet, WalletConnect, Privy, or Snaps. Connect a wallet and switch to GenLayer Studionet before signing. Public reads can be explored without signing.
+
+## Verification
+
+```powershell
 python -m py_compile contracts/headroom.py tests/direct/*.py tests/integration/*.py
 python scripts/check_genvm_lint.py
 pytest tests/direct/ -v
 python scripts/check_release.py
 python scripts/check_contract_patterns.py
 python scripts/check_frontend_surface.py
-cd frontend && npm install && npm run typecheck && npm run build
+cd frontend
+npm install
+npm run typecheck
+npm run build
 ```
 
-See [verification status](VERIFICATION_STATUS.md), [static verification](STATIC_VERIFICATION.md), and [review evidence](docs/REVIEW_EVIDENCE.md). CI runs the same gates. The current GitHub Actions result is linked from the review evidence.
+The pinned `genvm-linter==0.11.1rc2` validation gate permits only the reviewed seven E010 custom validator reachability diagnostics; new diagnostics fail CI. Direct Mode uses `genlayer-test==0.29.2` and `genlayer-py==0.16.3`. Release results, CI, real transactions, and any uncompleted live proof are maintained in [docs/REVIEW_EVIDENCE.md](docs/REVIEW_EVIDENCE.md).
 
-## Deployment status
+## Repository Map
 
-No deployment or live Studionet lifecycle proof is claimed. The next phase requires real independent consensus evidence, a complete live lifecycle, frontend wiring to the deployed address, and reviewer evidence.
+- `contracts/` — single substantial GenLayer Intelligent Contract
+- `frontend/` — Next.js App Router control room, structured evidence forms, injected wallet
+- `tests/direct/` — deterministic and adversarial Direct Mode coverage
+- `tests/integration/` — opt-in live Studionet read/smoke checks
+- `deploy/` — stable Studionet deployment tooling
+- `docs/` — architecture, security, live-demo and reviewer evidence
+- `branding/` — reusable HEADROOM brand assets
+- `scripts/` — source checks and pinned lint/release gates
+
+## License
+
+MIT. See [LICENSE](LICENSE).

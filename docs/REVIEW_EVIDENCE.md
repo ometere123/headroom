@@ -1,32 +1,92 @@
-# HEADROOM review evidence
+# HEADROOM Review Evidence
 
-This record distinguishes local and CI checks from live-network proof. Values for source counts are generated from the current contract and tests.
+## Canonical network and contract
 
-## Current source and quality gates
+| Field | Verified value |
+| --- | --- |
+| Network | GenLayer Studionet |
+| Chain ID | `61999` |
+| RPC | `https://studio.genlayer.com/api` |
+| Explorer | [explorer-studio.genlayer.com](https://explorer-studio.genlayer.com) |
+| Contract | [`0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C`](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C) |
+| Deployment transaction | [`0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`](https://explorer-studio.genlayer.com/tx/0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929) |
+| Deployment status | FINALIZED; execution SUCCESS; 3 AGREE, 2 IDLE |
+| Contract source commit | `7aecd8f4312557de504de2709d04f646c102dce0` |
+| Deployed source SHA-256 | `461fc74172e1d4a8a3e36d344280bc4e1cb22afd8ac44d9ea750138ee3954abe` |
+| Source match | Retrieved deployed source equals `contracts/headroom.py` at the source commit byte for byte |
+| Schema | 31 methods: 10 views and 21 writes |
+| CLI | GenLayer CLI 0.39.1; network config Studionet / 61999 / stable RPC |
+| Frontend | [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/) |
 
-- source: `main` at the current pushed commit (see repository history)
-- contract: `contracts/headroom.py`
-- contract lines: **609**
-- public methods: **10 views / 21 writes**
-- Direct Mode tests: **54**
-- Python compile: **PASS**
-- GenVM validation: **PASS** with pinned Depends SDK using `genvm-linter==0.11.1rc2`
-- GenVM static lint: seven documented E010 custom `run_nondet_unsafe` reachability warnings; only this exact set is allowed by CI. Full diagnostics are in `genvm-lint-full-output.txt` and disposition in `genvm-lint-disposition.md`.
-- Direct Mode: **PASS** (see latest GitHub Actions run)
-- release/contract-pattern/frontend-surface static checks: **PASS**
-- frontend typecheck and production build: **PASS**
-- CI: [latest HEADROOM CI run on `main`](https://github.com/ometere123/headroom/actions/workflows/ci.yml?query=branch%3Amain)
+The source commit above identifies the deployed contract source. Later frontend and documentation commits do not change the contract and do not require redeployment.
 
-## Live release gates pending
+## Deployed `get_stats()`
 
-- contract address and deployment transaction
-- real Studionet independent consensus evidence
-- complete live economic lifecycle and accounting proof
-- deployed source/schema comparison
-- deployed-address frontend wiring and hosted frontend
+The verified initial deployed response is:
 
-No live deployment or consensus outcome is represented as complete.
+```json
+{
+  "version": "0.1.0-studionet",
+  "network": "Studionet",
+  "chain_id": 61999,
+  "rpc": "https://studio.genlayer.com/api",
+  "covenants": 0,
+  "reservations": 0,
+  "changes": 0,
+  "incidents": 0,
+  "admissions": 0,
+  "prevented": 0,
+  "settlements": 0,
+  "covenant_escrow": "0",
+  "challenge_escrow": "0",
+  "claimable": "0",
+  "withdrawn": "0",
+  "accounting_balanced": true,
+  "admin_controls": false
+}
+```
 
-## Reviewer thesis
+## Toolchain and release checks
 
-HEADROOM establishes consensus before risk. Deterministic capacity and collateral checks prevent impossible requests from reaching semantic admission. Frozen evidence-origin classes bind source claims to authorized HTTPS origins. When prevention fails, consensus establishes bounded incident facts and contract code derives the liability and final settlement certificate.
+Record final candidate evidence here after checks run on the pushed release commit:
+
+| Check | Result |
+| --- | --- |
+| Python | 3.12.3 |
+| Direct Mode | `genlayer-test==0.29.2`, `genlayer-py==0.16.3`; 54 passed |
+| GenVM lint | `genvm-linter==0.11.1rc2`; validation passed, 31 methods; wrapper PASS, exact seven reviewed E010 lint diagnostics only (validation also notes I200: a newer runner is available) |
+| `py_compile` | PASS for contract, direct tests, integration tests |
+| `check_release.py` | PASS; Studionet 61999 stable RPC |
+| `check_contract_patterns.py` | PASS |
+| `check_frontend_surface.py` | PASS; 6 required route patterns and 13 protocol actions checked |
+| Frontend SDK | exact `genlayer-js==1.1.8` |
+| Frontend typecheck/build | PASS; Next.js production build generated all routes |
+| GitHub Actions | pending release commit |
+| Vercel | existing project `headroom`, root `frontend`; Production vars configured; production deployment pending |
+
+## Chronological live transaction evidence
+
+Only the deployment transaction exists at the time this evidence was written. Empty lifecycle cells are intentionally marked NOT EXECUTED; they are not simulated or inferred. Update rows with transaction hashes only after user-approved wallet operations finalize and execute successfully.
+
+| Action | Method | Transaction | Finalized? | Execution success? | Result | Evidence / state |
+| --- | --- | --- | --- | --- | --- | --- |
+| Deploy canonical Headroom | Deployment | [`0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`](https://explorer-studio.genlayer.com/tx/0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929) | Yes | Yes | Contract created at canonical address | [Contract explorer](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C); source hash above |
+| Create/bond covenant | `create_covenant` | NOT EXECUTED | — | — | Awaiting user wallet approval | No covenant exists in initial deployed state |
+| Deterministic prevention | `request_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Must inspect post-state and `prevented` count |
+| Semantic prevention | `review_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Requires truthful, currently unsafe evidence |
+| SAFE admission | `request_reservation` + `review_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Must record actual reservation and frozen evidence |
+| Change preflight | `propose_change` + `review_change` | NOT EXECUTED | — | — | Not yet demonstrated live | Permit must precede its window |
+| Incident opening | `open_incident` | NOT EXECUTED | — | — | No qualifying miss documented | Never infer from user-entered metric |
+| Measurement verification | `verify_incident_measurement` | NOT EXECUTED | — | — | Not yet demonstrated live | Needs an actual measured miss in an active window |
+| Frozen exception | `claim_exception` | NOT EXECUTED | — | — | Not yet demonstrated live | Requires frozen rule and authorized evidence |
+| Incident examination | `examine_incident` | NOT EXECUTED | — | — | Not yet demonstrated live | GenLayer facts only; contract determines money |
+| Deterministic liability | `judge_liability` | NOT EXECUTED | — | — | Not yet demonstrated live | Calculated from consensus facts |
+| Challenge | `challenge_liability` + `resolve_challenge` | NOT EXECUTED | — | — | No truthful counter-evidence submitted | Do not manufacture disagreement |
+| Settlement | `finalize_incident` | NOT EXECUTED | — | — | Not yet demonstrated live | Needs legitimate completed incident path |
+| Withdrawal | `withdraw_credit` | NOT EXECUTED | — | — | No credit to withdraw in initial state | Await user wallet approval if credit later exists |
+
+## Evidence source research
+
+Research retrieved the GitHub public status API (`https://www.githubstatus.com/api/v2/summary.json`) at 2026-09-21 19:18:58 UTC. It reported all listed components operational, no incidents or scheduled maintenance. Checkly’s public GitHub monitor (`https://www.checklyhq.com/availability/github/`) reported GitHub up when crawled five days earlier and its page describes its own two-region 10-minute HTTPS probe of `https://api.github.com`; the observations are not the same-time window, so it is only a candidate independent source. The two operators and origins are distinct. These sources have **not** been submitted to the contract or represented as evidence of a live decision. Their current health evidence does not support a truthful semantic UNSAFE test or an incident claim, and their use to promise service operated by someone else would be inappropriate. Select a service actually operated by the provider and recheck freshness before any wallet transaction.
+
+No controlled outage, fabricated status page, edited evidence timestamp, or historical outage reused for a new reservation is claimed.
