@@ -61,8 +61,8 @@ Release evidence for the current candidate is recorded below. Re-run checks afte
 | `check_frontend_surface.py` | PASS; 6 required route patterns and 13 protocol actions checked |
 | Frontend SDK | exact `genlayer-js==1.1.8` |
 | Frontend typecheck/build | PASS; Next.js production build generated all routes |
-| GitHub Actions | PASS, [run 35652087105](https://github.com/ometere123/headroom/actions/runs/35652087105), commit `399eef9ddbc57a55cebb310357279e213ab53ab5` |
-| Vercel | existing project `headroom`, root `frontend`; four Production variables configured; deployment READY at [production URL](https://the-headroom.vercel.app/) |
+| GitHub Actions | PASS, [run 35653626978](https://github.com/ometere123/headroom/actions/runs/35653626978), commit `77a864ae996d3215e386a33ea47349bf16c12bd2` |
+| Vercel | existing project `headroom`, root `frontend`; four Production variables configured; deployment READY at [production URL](https://the-headroom.vercel.app/); `/` and `/control` return HTTP 200 |
 | Browser walkthrough | Production home and operational routes loaded; live contract reads, wallet connection and UTC preference exercised; no write transaction submitted |
 
 ## Chronological live transaction evidence
@@ -94,6 +94,6 @@ No controlled outage, fabricated status page, edited evidence timestamp, or hist
 
 ## Production deployment and browser verification
 
-The existing Vercel project (`headroom`, root directory `frontend`) has the four required Production variables configured for the canonical contract and Studionet. Production is publicly reachable at [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/). Its deployment for source commit `399eef9ddbc57a55cebb310357279e213ab53ab5` is READY. The production interface was opened in a browser; home, control, service, admission, change, incident, settlement and protocol routes were exercised. The injected EIP-1193 wallet connected and chain reads returned the deployed state after load. No protocol write was sent.
+The existing Vercel project (`headroom`, root directory `frontend`) has the four required Production variables configured for the canonical contract and Studionet. Production is publicly reachable at [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/). Its latest deployment for source commit `77a864ae996d3215e386a33ea47349bf16c12bd2` is READY and aliases the production domain. The production interface was opened in a browser; home, control, service, admission, change, incident, settlement and protocol routes were exercised. The injected EIP-1193 wallet connected and chain reads returned the deployed state after load. No protocol write was sent.
 
 The read-only integration smoke path uses `genlayer-js==1.1.8` unsigned `readContract`, because `genlayer-py==0.16.3` currently raises `No account provided` on views. The SDK read was verified against the canonical deployment; full Python/Node cross-runtime smoke orchestration remains environment-dependent and is not reported as a passing integration-suite run.
