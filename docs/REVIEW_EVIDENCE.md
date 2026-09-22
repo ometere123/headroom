@@ -63,7 +63,7 @@ Release evidence for the current candidate is recorded below. Re-run checks afte
 | `check_frontend_surface.py` | PASS; 6 required route patterns and 13 protocol actions checked |
 | Frontend SDK | exact `genlayer-js==1.1.8` |
 | Frontend typecheck/build | PASS; Next.js production build generated all routes |
-| GitHub Actions | PASS, [run Final CI|35695176784](https://github.com/ometere123/headroom/actions/runs/Final CI|35695176784), commit `add2f35d08cde554bec6d9bed98c5094554035d9` |
+| GitHub Actions | PASS, [run 35695176784](https://github.com/ometere123/headroom/actions/runs/35695176784), commit `add2f35d08cde554bec6d9bed98c5094554035d9` |
 | Vercel | existing project `headroom`, root `frontend`; four Production variables configured; deployment READY at [production URL](https://the-headroom.vercel.app/); `/` and `/control` return HTTP 200 |
 | Browser walkthrough | Production home and operational routes loaded; live contract reads, wallet connection and UTC preference exercised; no write transaction submitted |
 
@@ -99,3 +99,32 @@ No controlled outage, fabricated status page, edited evidence timestamp, or hist
 The existing Vercel project (`headroom`, root directory `frontend`) has the four required Production variables configured for the canonical contract and Studionet. Production is publicly reachable at [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/). Its latest deployment for source commit `add2f35d08cde554bec6d9bed98c5094554035d9` is READY and aliases the production domain. The production interface was opened in a browser; home, control, service, admission, change, incident, settlement and protocol routes were exercised. The injected EIP-1193 wallet connected and chain reads returned the deployed state after load. No protocol write was sent.
 
 The read-only integration smoke path uses `genlayer-js==1.1.8` unsigned `readContract`, because `genlayer-py==0.16.3` currently raises `No account provided` on views. The SDK read was verified against the canonical deployment; full Python/Node cross-runtime smoke orchestration remains environment-dependent and is not reported as a passing integration-suite run.
+
+
+## Final release state
+
+Contract Source Commit: `add2f35d08cde554bec6d9bed98c5094554035d9`
+
+Frontend and documentation release commits are separate from the deployed contract source. The final application commit is recorded after this release commit is pushed.
+
+Canonical Contract: `0x235Fd204E6d78e61055a6BD24B06319aA503D2f1`
+
+Deployment Transaction: `0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`
+
+### Live transaction chronology
+
+| Action | Transaction | Result |
+|---|---|---|
+| Create `hr-cv-1` | `0xa0792d197bb882b55fffc1198043854a03793c0884c75c51a2563c664c003cbc` | FINALIZED, execution success, return `hr-cv-1` |
+| Close `hr-cv-1` | `0x1898d9f453d82c70cb8194b698bd385d522f9d3f346f089337ee973ddbc5ad20` | FINALIZED, execution success, null return |
+| Withdraw | `0xbd1dbd26c544ed3bf542b602bce8a6249af539e877b185dd431a8b7dee9ae99b` | execution success, 1 GEN return |
+| Create `hr-cv-3` | `0x80c3f3e09d4fb8d27722a0dbe9bb87cf07e72a1030e03a075b011cbb6969fec0` | FINALIZED, execution success |
+| Deterministic prevention `hr-r-1` | `0x7cc4f80a71da8a9bd062133aa3ea97591e4c5440593dec9598f4b13285988a5d` | `DENIED_DETERMINISTIC`, no reserves |
+| Request `hr-r-2` | `0x1123d3dd64165cacf8e9121699773eebec2a8805c46a9d94d340b60df5cfaf1a` | PENDING, deterministic checks passed |
+| Review `hr-r-2` | `0xe8f0931b08139f206eb0411e01642944b8b01bbf3e200c51de82645b7dbf30ed` | `SAFE`, ACTIVE, one unit and 0.10 GEN reserved |
+
+The first reservation attempt `0xed55427df945500c9e772413f9d711bc6f0c7b30e9700c82256b190c27728de0` rolled back because the frontend encoded `max_credit_atto` as a string. It changed no state; commit `e8df75a` corrected the encoding.
+
+The production UI previously showed false failures when receipt monitoring lost RPC connectivity or execution metadata was incomplete. Receipt reconciliation was hardened in `d02dbbe`; later casing, admissions visibility and amount-format issues were corrected without changing the contract.
+
+At the final semantic review, the provider URL and Domainee probe both returned HTTP 200. No genuine change event or incident occurred during the review window, so those branches were not fabricated.

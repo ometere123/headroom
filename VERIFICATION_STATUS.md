@@ -18,4 +18,4 @@ Record the results for the exact release commit here and in [review evidence](do
 
 ## Live protocol evidence
 
-The deployment is verified. Covenant creation and subsequent protocol operations require a wallet signature from the user, and the provider-operated service/evidence origins have not yet been supplied. Until those inputs exist and transactions are personally approved and successfully finalized, this repository makes no live claim for semantic admission, prevention, change preflight, incident measurement, exception examination, liability, challenge, settlement, or withdrawal.
+The deployment is verified and live proof is now present. `hr-cv-3` is active, `hr-r-1` proves deterministic prevention, and `hr-r-2` proves a SAFE GenLayer admission. No change, incident or settlement is claimed because no truthful qualifying event occurred during the review window.

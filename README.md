@@ -142,3 +142,17 @@ HEADROOM treats non-decision states according to the stage of the protocol. Duri
 ## Evidence commitment boundary
 
 Each fetched evidence document is bounded to `MAX_EVIDENCE_CHARS` characters (18,000). HEADROOM hashes exactly the evaluated prefix supplied to semantic validators. The commitment therefore has the same boundary as the semantic input and does not claim to hash invisible remote content.
+
+
+## Live Protocol Proof
+
+- Fresh bonded service: `hr-cv-3`
+- Bond: `1 GEN`
+- Safe capacity: `8 units`
+- Deterministic test: `9` unit request
+- Result: `DENIED_DETERMINISTIC` because capacity headroom failed
+- Capacity and liability reserved: `0` and `0 GEN`
+- Semantic test: `hr-r-2` was admitted `SAFE` by GenLayer and is ACTIVE with one unit and `0.1 GEN` reserved liability.
+- Accounting: balanced
+
+See [review evidence](docs/REVIEW_EVIDENCE.md) and [live demo](docs/LIVE_DEMO.md) for transaction details and the bounded live scope.

@@ -25,6 +25,8 @@ The app uses an infrastructure operations shell with a persistent operations rai
 | Production deploy/browser walkthrough | READY; existing Vercel project deployed to https://the-headroom.vercel.app/ and browser routes/live reads/wallet connection exercised |
 | Live contract writes | Awaiting the user’s wallet approval when a real operation is prepared |
 
-The canonical contract currently has no covenants or lifecycle records. No incident, semantic decision, admission, settlement, or withdrawal is claimed until a real finalized transaction establishes it. Contract Source Commit: `add2f35d08cde554bec6d9bed98c5094554035d9`
+Live protocol proof is now recorded. `hr-cv-3` is active; `hr-r-1` is a finalized deterministic prevention and `hr-r-2` is a finalized SAFE semantic admission. No incident or settlement is claimed because no qualifying real-world event occurred. Contract Source Commit: `add2f35d08cde554bec6d9bed98c5094554035d9`
+
+Final application commits are frontend/docs commits and do not replace the deployed contract source commit.
 Frontend Implementation Commit: `f6b9cf5c57348c956c4a559ab12e7ecb6aca8aa7`
 Final Release HEAD: `c339a58782d060b04b6cf3c01e057f721122f681`; CI run [35695176784](https://github.com/ometere123/headroom/actions/runs/35695176784) is green. A documentation-only evidence synchronization commit follows this verified source revision.

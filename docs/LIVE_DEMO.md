@@ -1,26 +1,14 @@
-# HEADROOM Live Demo Protocol
+# Live Demo Evidence
 
-HEADROOM must be demonstrated with truthful evidence and real wallet-approved transactions. The deployed Studionet contract currently has no covenants or lifecycle records.
+HEADROOM is live on GenLayer Studionet (61999) at https://the-headroom.vercel.app/. The canonical contract is `0x235Fd204E6d78e61055a6BD24B06319aA503D2f1`, deployed by `0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`.
 
-## Evidence candidates
+## Current truthful state
 
-- GitHub status API: `https://www.githubstatus.com/api/v2/summary.json` - provider-operated status, `PROVIDER_STATUS`.
-- Checkly GitHub availability: `https://www.checklyhq.com/availability/github/` - separate synthetic-monitor operator, candidate `INDEPENDENT_PROBE`.
+- `hr-cv-1` and `hr-cv-2` are historical CLOSED covenants.
+- `hr-cv-3` is ACTIVE with a 1 GEN bond, 10 unit ceiling and 8 unit safe capacity.
+- `hr-r-1` is a real 9 unit request recorded as `DENIED_DETERMINISTIC`; capacity precheck false, liability precheck true, and no capacity or liability was reserved. Transaction: `0x7cc4f80a71da8a9bd062133aa3ea97591e4c5440593dec9598f4b13285988a5d`.
+- `hr-r-2` passed deterministic checks and underwent real GenLayer admission. Request transaction: `0x1123d3dd64165cacf8e9121699773eebec2a8805c46a9d94d340b60df5cfaf1a`. Review transaction: `0xe8f0931b08139f206eb0411e01642944b8b01bbf3e200c51de82645b7dbf30ed`. Consensus result: `SAFE`, risk `GREEN`; the reservation is ACTIVE with one unit and 0.10 GEN reserved liability.
 
-These are research candidates, not frozen contract evidence and not proof of an outage. GitHub status reported its components operational with no incidents/maintenance at the time recorded in review evidence. Checkly's page reported a separate probe as up, but its observation time differed. These sources do not establish unsafe health or an outage and are not appropriate evidence for a service the covenant provider does not operate. Recheck relevance and freshness before forming any covenant. An old incident cannot be moved into a newly created SLA window.
+The frozen evidence was the production URL and the Domainee HTTP probe. At review time both returned HTTP 200, and the probe reported `up=true` for the production URL. The semantic basis is recorded on-chain and in `docs/REVIEW_EVIDENCE.md`.
 
-## Current execution boundary
-
-The canonical contract has no covenant yet. Do not create one until the provider identifies a service it operates and public evidence origins that honestly represent provider status/capacity, an independent probe, and any dependencies. The connected wallet is not a substitute for those facts. The app and chain are deployed and verified; no protocol write has been submitted.
-
-## Safe execution sequence
-
-1. Inspect sources and authorize each HTTPS origin for its real evidence class.
-2. Ask the provider wallet to approve `create_covenant` and fund the bond.
-3. Demonstrate deterministic refusal with an impossible request; verify it reserves nothing and increments `prevented`.
-4. Use a distinct-source request supported by current, healthy evidence; obtain wallet approval, run consensus, and verify state after refresh.
-5. Exercise change preflight with a real future notice and evidence before the window.
-6. Run the post-failure path only if a genuine measured miss occurs within the active reservation window.
-7. Re-fetch final state, settlement certificate, and accounting invariant after each completed step.
-
-Do not create synthetic history, label provider-controlled evidence independent, fabricate an outage, or infer a successful execution from transaction finality alone. See [review evidence](REVIEW_EVIDENCE.md) for actual transactions; unexecuted paths are marked explicitly.
+No genuine maintenance event or qualifying service incident occurred during this review window. Change control, measurement, exception, liability, challenge, settlement and withdrawal were not fabricated. Those branches remain covered by Direct Mode and prior read-only evidence.
