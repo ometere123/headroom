@@ -27,6 +27,10 @@ for required in ('ExecutionResult.FINISHED_WITH_RETURN', 'BigInt(whole)*10n**18n
     if required not in contract: failures.append("missing verified GenLayer result or exact decimal parser: " + required)
 for forbidden in ('61997','studio-dev','wallet_getSnaps','wallet_requestSnaps','WalletConnect','Privy'):
     if forbidden in all_source: failures.append("forbidden wallet path: " + forbidden)
+for forbidden in ('list_Incidents','Availability_target_bps','actual_Availability_bps'):
+    if forbidden in all_source: failures.append("case-sensitive contract identifier mutated: " + forbidden)
+for required in ('list_incidents','availability_target_bps','actual_availability_bps'):
+    if required not in all_source: failures.append("missing case-sensitive contract identifier: " + required)
 if failures:
     print("HEADROOM_FRONTEND_SURFACE_CHECK=FAIL")
     print("\n".join(failures))

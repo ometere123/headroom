@@ -1,3 +1,3 @@
 import {ActivityBoard} from "@/components/ActivityBoard";
-export default function Incidents(){return <ActivityBoard kind="Incidents"/>}
+export default function Incidents(){return <ActivityBoard kind="incidents"/>}
 
