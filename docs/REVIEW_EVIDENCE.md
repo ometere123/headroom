@@ -13,7 +13,7 @@
 | Deployment status | FINALIZED; execution SUCCESS; 3 AGREE, 2 IDLE |
 | Contract source commit | `add2f35d08cde554bec6d9bed98c5094554035d9` |
 | Frontend implementation commit | `f6b9cf5c57348c956c4a559ab12e7ecb6aca8aa7` |
-| Final release HEAD | `c339a58782d060b04b6cf3c01e057f721122f681` |
+| Final release HEAD | `c73962e9eb7184e8239ceb11596794a688cc17f3` |
 | Deployed source SHA-256 | `a61cb6815251ac3f118fb73fe81c9e10b7575c13ab3135e7664ebcdd9b587dbd` |
 | Source match | Retrieved deployed source equals `contracts/headroom.py` at the source commit byte for byte |
 | Schema | 31 methods: 10 views and 21 writes |
@@ -69,12 +69,12 @@ Release evidence for the current candidate is recorded below. Re-run checks afte
 
 ## Chronological live transaction evidence
 
-The deployment transaction is the only protocol transaction in this record. Empty lifecycle cells are intentionally marked NOT EXECUTED; they are not simulated or inferred. Update rows with transaction hashes only after user-approved wallet operations finalize and execute successfully.
+The deployment transaction and the user-approved covenant transaction below are recorded from Studionet. The covenant write finalized and executed successfully on-chain. The original production UI briefly reported a monitoring fetch error after submission; it did not represent protocol execution failure.
 
 | Action | Method | Transaction | Finalized? | Execution success? | Result | Evidence / state |
 | --- | --- | --- | --- | --- | --- | --- |
 | Deploy canonical Headroom | Deployment | [`0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`](https://explorer-studio.genlayer.com/tx/0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e) | Yes | Yes | Contract created at canonical address | [Contract explorer](https://explorer-studio.genlayer.com/address/0x235Fd204E6d78e61055a6BD24B06319aA503D2f1); source hash above |
-| Create/bond covenant | `create_covenant` | NOT EXECUTED | - | - | Waiting for a service operated by the provider and relevant truthful evidence | No covenant exists in initial deployed state |
+| Create/bond covenant | `create_covenant` | [`0xa0792d197bb882b55fffc1198043854a03793c0884c75c51a2563c664c003cbc`](https://explorer-studio.genlayer.com/tx/0xa0792d197bb882b55fffc1198043854a03793c0884c75c51a2563c664c003cbc) | Yes | Yes | `hr-cv-1`; 1 GEN bonded | Consensus Accepted; GenVM SUCCESS; return value `hr-cv-1`. Original UI monitoring fetch failed after submission and was hardened in `c73962e9`. |
 | Deterministic prevention | `request_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Must inspect post-state and `prevented` count |
 | Semantic prevention | `review_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Requires truthful, currently unsafe evidence |
 | SAFE admission | `request_reservation` + `review_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Must record actual reservation and frozen evidence |
