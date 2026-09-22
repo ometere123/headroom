@@ -2,6 +2,7 @@ import json
 import pytest
 from gltest.direct import create_address
 import hashlib
+from pathlib import Path
 from tests.direct.conftest import hx
 
 CONTRACT = "contracts/headroom.py"
@@ -220,10 +221,29 @@ def test_unavailable_measurement_has_bounded_liveness_and_can_be_dismissed(direc
     assert c.get_reservation(rid)["incident_id"] == ""
 
 def test_evidence_digest_commits_exact_evaluated_prefix(direct_vm, direct_deploy, direct_alice):
-    source = open(CONTRACT, encoding="utf-8").read()
-    assert "MAX_EVIDENCE_CHARS=18000" in source
-    assert "evaluated=t[:MAX_EVIDENCE_CHARS]" in source
-    assert '"content":evaluated,"hash":_hash(evaluated)' in source
+    # Execute the contract's real _fetch implementation with a deterministic web stub.
+    import ast, types
+    source = Path(CONTRACT).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    fetch_node = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_fetch")
+    fetch_code = compile(ast.Module(body=[fetch_node], type_ignores=[]), CONTRACT, "exec")
+    prefix = "A" * 18000
+    docs = {"https://a.example": prefix + "B" * 8000, "https://b.example": prefix + "C" * 8000, "https://c.example": "A" * 17999 + "Z" + "C" * 8000}
+    class Web:
+        def render(self, url, mode="text"):
+            return docs[url]
+    gl = types.SimpleNamespace(nondet=types.SimpleNamespace(web=Web()))
+    ns = {"MAX_EVIDENCE_CHARS": 18000, "_hash": lambda v: hashlib.sha256(v.encode()).hexdigest(), "gl": gl}
+    exec(fetch_code, ns)
+    fetched_a, err_a = ns["_fetch"]([{"id":"A","url":"https://a.example"}])
+    fetched_b, err_b = ns["_fetch"]([{"id":"B","url":"https://b.example"}])
+    fetched_c, err_c = ns["_fetch"]([{"id":"C","url":"https://c.example"}])
+    assert not err_a and not err_b and not err_c
+    assert fetched_a[0]["content"] == prefix
+    assert fetched_a[0]["hash"] == hashlib.sha256(prefix.encode()).hexdigest()
+    assert fetched_a[0]["hash"] == fetched_b[0]["hash"]
+    assert fetched_a[0]["hash"] != fetched_c[0]["hash"]
+    assert fetched_a[0]["content"] == fetched_b[0]["content"] == prefix
     assert "t[:26000]" not in source
 
 
@@ -729,3 +749,6 @@ def test_challenge_evidence_requires_frozen_challenge_class(direct_vm,direct_dep
     direct_vm.sender=direct_bob;direct_vm.value=10**16
     with direct_vm.expect_revert("origin/class is not authorized"):
         c.challenge_liability(iid,"wrongly classified counter evidence","https://counter.example/evidence")
+
+
+

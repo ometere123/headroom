@@ -1,1 +1,1 @@
-import Link from "next/link"; export default function NotFound(){return <section className="shell page"><div className="kicker">404</div><h1>That headroom object is not here.</h1><Link className="button" href="/">return home</Link></section>}
+import Link from "next/link"; export default function NotFound(){return <section className="shell page"><div className="kicker">404</div><h1>That headroom object is not here.</h1><Link className="button" href="/">Return Home</Link></section>}
