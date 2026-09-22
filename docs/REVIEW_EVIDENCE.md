@@ -13,7 +13,7 @@
 | Deployment status | FINALIZED; execution SUCCESS; 3 AGREE, 2 IDLE |
 | Contract source commit | `add2f35d08cde554bec6d9bed98c5094554035d9` |
 | Frontend implementation commit | `f6b9cf5c57348c956c4a559ab12e7ecb6aca8aa7` |
-| Final release HEAD | `52b7beb50af2c4f88154487040012e80f6dabafb` |
+| Final release HEAD | `c339a58782d060b04b6cf3c01e057f721122f681` |
 | Deployed source SHA-256 | `a61cb6815251ac3f118fb73fe81c9e10b7575c13ab3135e7664ebcdd9b587dbd` |
 | Source match | Retrieved deployed source equals `contracts/headroom.py` at the source commit byte for byte |
 | Schema | 31 methods: 10 views and 21 writes |
@@ -63,7 +63,7 @@ Release evidence for the current candidate is recorded below. Re-run checks afte
 | `check_frontend_surface.py` | PASS; 6 required route patterns and 13 protocol actions checked |
 | Frontend SDK | exact `genlayer-js==1.1.8` |
 | Frontend typecheck/build | PASS; Next.js production build generated all routes |
-| GitHub Actions | PASS, [run 35690301279](https://github.com/ometere123/headroom/actions/runs/35690301279), commit `add2f35d08cde554bec6d9bed98c5094554035d9` |
+| GitHub Actions | PASS, [run Final CI|35695176784](https://github.com/ometere123/headroom/actions/runs/Final CI|35695176784), commit `add2f35d08cde554bec6d9bed98c5094554035d9` |
 | Vercel | existing project `headroom`, root `frontend`; four Production variables configured; deployment READY at [production URL](https://the-headroom.vercel.app/); `/` and `/control` return HTTP 200 |
 | Browser walkthrough | Production home and operational routes loaded; live contract reads, wallet connection and UTC preference exercised; no write transaction submitted |
 

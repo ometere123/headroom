@@ -27,4 +27,4 @@ The app uses an infrastructure operations shell with a persistent operations rai
 
 The canonical contract currently has no covenants or lifecycle records. No incident, semantic decision, admission, settlement, or withdrawal is claimed until a real finalized transaction establishes it. Contract Source Commit: `add2f35d08cde554bec6d9bed98c5094554035d9`
 Frontend Implementation Commit: `f6b9cf5c57348c956c4a559ab12e7ecb6aca8aa7`
-Final Release HEAD: `5596e09443ce0ff35719777b0818390b8634dcdd`; CI run [35690301279](https://github.com/ometere123/headroom/actions/runs/35690301279) is green. A documentation-only evidence synchronization commit follows this verified source revision.
+Final Release HEAD: `c339a58782d060b04b6cf3c01e057f721122f681`; CI run [35695176784](https://github.com/ometere123/headroom/actions/runs/35695176784) is green. A documentation-only evidence synchronization commit follows this verified source revision.
