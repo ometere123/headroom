@@ -17,3 +17,4 @@ export function gen(value:string|number){
   const [whole,fraction=""]=text.split(".");
   return BigInt(whole)*10n**18n+BigInt((fraction+"0".repeat(18)).slice(0,18));
 }
+
