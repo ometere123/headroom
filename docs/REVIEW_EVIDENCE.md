@@ -129,5 +129,6 @@ The production UI previously showed false failures when receipt monitoring lost 
 
 At the final semantic review, the provider URL and Domainee probe both returned HTTP 200. No genuine change event or incident occurred during the review window, so those branches were not fabricated.
 
-Final Release HEAD: `PENDING_FINAL_COMMIT`
-Final CI: `PENDING_FINAL_CI`
+Final Release HEAD: `91b01d6261d6b5d606848aba8c64a721a939ceb3`
+Final CI: `CI run for final HEAD is pending`
+

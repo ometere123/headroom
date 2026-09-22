@@ -29,4 +29,5 @@ Live protocol proof is now recorded. `hr-cv-3` is active; `hr-r-1` is a finalize
 
 Final application commits are frontend/docs commits and do not replace the deployed contract source commit.
 Frontend Implementation Commit: `f6b9cf5c57348c956c4a559ab12e7ecb6aca8aa7`
-Final Release HEAD: `PENDING_FINAL_COMMIT`; Final CI: `PENDING_FINAL_CI`. The live proof is documented in `docs/REVIEW_EVIDENCE.md`. No genuine change or incident occurred during the review window.
+Final Release HEAD: `91b01d6261d6b5d606848aba8c64a721a939ceb3`; Final CI: `CI run for final HEAD is pending`. The live proof is documented in `docs/REVIEW_EVIDENCE.md`. No genuine change or incident occurred during the review window.
+
