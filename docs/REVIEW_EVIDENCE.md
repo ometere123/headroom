@@ -13,7 +13,7 @@
 | Deployment status | FINALIZED; execution SUCCESS; 3 AGREE, 2 IDLE |
 | Contract source commit | `add2f35d08cde554bec6d9bed98c5094554035d9` |
 | Frontend implementation commit | `f6b9cf5c57348c956c4a559ab12e7ecb6aca8aa7` |
-| Final release HEAD | `c73962e9eb7184e8239ceb11596794a688cc17f3` |
+| Final release HEAD | `3f0d05c062da40d7df9828bcafe89670988e7f3` |
 | Deployed source SHA-256 | `a61cb6815251ac3f118fb73fe81c9e10b7575c13ab3135e7664ebcdd9b587dbd` |
 | Source match | Retrieved deployed source equals `contracts/headroom.py` at the source commit byte for byte |
 | Schema | 31 methods: 10 views and 21 writes |
