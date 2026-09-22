@@ -1,0 +1,5 @@
+import { RPC } from "./config";
+export async function genRpc<T>(method:string,params:unknown[],request:typeof fetch=fetch):Promise<T>{const response=await request(RPC,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:Date.now(),method,params})});if(!response.ok)throw new Error(`GenLayer RPC HTTP ${response.status}`);const body=await response.json() as any;if(body.error)throw new Error(body.error?.message??JSON.stringify(body.error));return body.result as T;}
+export type GenLayerReceipt={status?:number|string;statusName?:string;result?:number|string;txExecutionResult?:number|string;txExecutionResultName?:string;consensus_data?:{leader_receipt?:unknown};[key:string]:unknown};
+export const getTransactionReceipt=(txId:string,request:typeof fetch=fetch)=>genRpc<GenLayerReceipt>("gen_getTransactionReceipt",[{txId}],request);
+export const getTransactionStatus=(txId:string,request:typeof fetch=fetch)=>genRpc<unknown>("gen_getTransactionStatus",[txId],request);

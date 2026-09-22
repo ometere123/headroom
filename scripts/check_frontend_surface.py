@@ -21,9 +21,9 @@ for required in ('CHAIN_ID = 61999','https://studio.genlayer.com/api'):
     if required not in config: failures.append("missing frontend release lock: " + required)
 for required in ('window.ethereum','eth_requestAccounts','wallet_switchEthereumChain','wallet_addEthereumChain'):
     if required not in wallet: failures.append("missing EIP-1193 path: " + required)
-for required in ('writeContract','waitForTransactionReceipt','ExecutionResult.FINISHED_WITH_RETURN','LATEST_FINAL'):
+for required in ('writeContract','waitForTransactionReceipt','finalizedExecutionState','LATEST_FINAL'):
     if required not in contract: failures.append("missing finalized GenLayer integration behavior: " + required)
-for required in ('ExecutionResult.FINISHED_WITH_RETURN', 'BigInt(whole)*10n**18n'):
+for required in ('finalizedExecutionState', 'BigInt(whole)*10n**18n'):
     if required not in contract: failures.append("missing verified GenLayer result or exact decimal parser: " + required)
 for forbidden in ('61997','studio-dev','wallet_getSnaps','wallet_requestSnaps','WalletConnect','Privy'):
     if forbidden in all_source: failures.append("forbidden wallet path: " + forbidden)
