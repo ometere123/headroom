@@ -75,9 +75,9 @@ The deployment transaction and the user-approved covenant transaction below are 
 | --- | --- | --- | --- | --- | --- | --- |
 | Deploy canonical Headroom | Deployment | [`0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`](https://explorer-studio.genlayer.com/tx/0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e) | Yes | Yes | Contract created at canonical address | [Contract explorer](https://explorer-studio.genlayer.com/address/0x235Fd204E6d78e61055a6BD24B06319aA503D2f1); source hash above |
 | Create/bond covenant | `create_covenant` | [`0xa0792d197bb882b55fffc1198043854a03793c0884c75c51a2563c664c003cbc`](https://explorer-studio.genlayer.com/tx/0xa0792d197bb882b55fffc1198043854a03793c0884c75c51a2563c664c003cbc) | Yes | Yes | `hr-cv-1`; 1 GEN bonded | Consensus Accepted; GenVM SUCCESS; return value `hr-cv-1`. Original UI monitoring fetch failed after submission and was hardened in `c73962e9`. |
-| Deterministic prevention | `request_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Must inspect post-state and `prevented` count |
+| Deterministic prevention | `request_reservation` | COMPLETED | `0x7cc4f80a71da8a9bd062133aa3ea97591e4c5440593dec9598f4b13285988a5d` | FINALIZED, success | `hr-r-1` DENIED_DETERMINISTIC; no reserves; prevented +1 |
 | Semantic prevention | `review_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Requires truthful, currently unsafe evidence |
-| SAFE admission | `request_reservation` + `review_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Must record actual reservation and frozen evidence |
+| SAFE admission | `request_reservation` + `review_reservation` | COMPLETED | `0x1123d3dd64165cacf8e9121699773eebec2a8805c46a9d94d340b60df5cfaf1a` / `0xe8f0931b08139f206eb0411e01642944b8b01bbf3e200c51de82645b7dbf30ed` | FINALIZED, success | `hr-r-2` SAFE and ACTIVE; one unit; 0.10 GEN reserved |
 | Change preflight | `propose_change` + `review_change` | NOT EXECUTED | - | - | Not yet demonstrated live | Permit must precede its window |
 | Incident opening | `open_incident` | NOT EXECUTED | - | - | No qualifying miss documented | Never infer from user-entered metric |
 | Measurement verification | `verify_incident_measurement` | NOT EXECUTED | - | - | Not yet demonstrated live | Needs an actual measured miss in an active window |
@@ -86,7 +86,7 @@ The deployment transaction and the user-approved covenant transaction below are 
 | Deterministic liability | `judge_liability` | NOT EXECUTED | - | - | Not yet demonstrated live | Calculated from consensus facts |
 | Challenge | `challenge_liability` + `resolve_challenge` | NOT EXECUTED | - | - | No truthful counter-evidence submitted | Do not manufacture disagreement |
 | Settlement | `finalize_incident` | NOT EXECUTED | - | - | Not yet demonstrated live | Needs legitimate completed incident path |
-| Withdrawal | `withdraw_credit` | NOT EXECUTED | - | - | No credit to withdraw in initial state | Await user wallet approval if credit later exists |
+| Withdrawal | `withdraw_credit` | COMPLETED | `0xbd1dbd26c544ed3bf542b602bce8a6249af539e877b185dd431a8b7dee9ae99b` | FINALIZED, success | Historical 1 GEN withdrawal; return value `1000000000000000000` |
 
 ## Evidence source research
 
@@ -96,7 +96,7 @@ No controlled outage, fabricated status page, edited evidence timestamp, or hist
 
 ## Production deployment and browser verification
 
-The existing Vercel project (`headroom`, root directory `frontend`) has the four required Production variables configured for the canonical contract and Studionet. Production is publicly reachable at [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/). Its latest deployment for source commit `add2f35d08cde554bec6d9bed98c5094554035d9` is READY and aliases the production domain. The production interface was opened in a browser; home, control, service, admission, change, incident, settlement and protocol routes were exercised. The injected EIP-1193 wallet connected and chain reads returned the deployed state after load. No protocol write was sent.
+The existing Vercel project (`headroom`, root directory `frontend`) has the four required Production variables configured for the canonical contract and Studionet. Production is publicly reachable at [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/). Its latest deployment is READY and uses the frontend release commit documented below. and aliases the production domain. The production interface was opened in a browser; home, control, service, admission, change, incident, settlement and protocol routes were exercised. The injected EIP-1193 wallet connected and chain reads returned the deployed state after load. Real protocol writes were submitted and reconciled; the deterministic and SAFE admission evidence is recorded above. No genuine change or incident occurred during the review window.
 
 The read-only integration smoke path uses `genlayer-js==1.1.8` unsigned `readContract`, because `genlayer-py==0.16.3` currently raises `No account provided` on views. The SDK read was verified against the canonical deployment; full Python/Node cross-runtime smoke orchestration remains environment-dependent and is not reported as a passing integration-suite run.
 
@@ -128,3 +128,6 @@ The first reservation attempt `0xed55427df945500c9e772413f9d711bc6f0c7b30e9700c8
 The production UI previously showed false failures when receipt monitoring lost RPC connectivity or execution metadata was incomplete. Receipt reconciliation was hardened in `d02dbbe`; later casing, admissions visibility and amount-format issues were corrected without changing the contract.
 
 At the final semantic review, the provider URL and Domainee probe both returned HTTP 200. No genuine change event or incident occurred during the review window, so those branches were not fabricated.
+
+Final Release HEAD: `PENDING_FINAL_COMMIT`
+Final CI: `PENDING_FINAL_CI`

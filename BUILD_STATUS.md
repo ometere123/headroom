@@ -29,4 +29,4 @@ Live protocol proof is now recorded. `hr-cv-3` is active; `hr-r-1` is a finalize
 
 Final application commits are frontend/docs commits and do not replace the deployed contract source commit.
 Frontend Implementation Commit: `f6b9cf5c57348c956c4a559ab12e7ecb6aca8aa7`
-Final Release HEAD: `c339a58782d060b04b6cf3c01e057f721122f681`; CI run [35695176784](https://github.com/ometere123/headroom/actions/runs/35695176784) is green. A documentation-only evidence synchronization commit follows this verified source revision.
+Final Release HEAD: `PENDING_FINAL_COMMIT`; Final CI: `PENDING_FINAL_CI`. The live proof is documented in `docs/REVIEW_EVIDENCE.md`. No genuine change or incident occurred during the review window.
