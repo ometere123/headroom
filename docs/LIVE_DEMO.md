@@ -4,8 +4,8 @@ HEADROOM must be demonstrated with truthful evidence and real wallet-approved tr
 
 ## Evidence candidates
 
-- GitHub status API: `https://www.githubstatus.com/api/v2/summary.json` — provider-operated status, `PROVIDER_STATUS`.
-- Checkly GitHub availability: `https://www.checklyhq.com/availability/github/` — separate synthetic-monitor operator, candidate `INDEPENDENT_PROBE`.
+- GitHub status API: `https://www.githubstatus.com/api/v2/summary.json` - provider-operated status, `PROVIDER_STATUS`.
+- Checkly GitHub availability: `https://www.checklyhq.com/availability/github/` - separate synthetic-monitor operator, candidate `INDEPENDENT_PROBE`.
 
 These are research candidates, not frozen contract evidence and not proof of an outage. GitHub status reported its components operational with no incidents/maintenance at the time recorded in review evidence. Checkly's page reported a separate probe as up, but its observation time differed. These sources do not establish unsafe health or an outage and are not appropriate evidence for a service the covenant provider does not operate. Recheck relevance and freshness before forming any covenant. An old incident cannot be moved into a newly created SLA window.
 

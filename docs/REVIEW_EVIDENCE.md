@@ -72,19 +72,19 @@ The deployment transaction is the only protocol transaction in this record. Empt
 | Action | Method | Transaction | Finalized? | Execution success? | Result | Evidence / state |
 | --- | --- | --- | --- | --- | --- | --- |
 | Deploy canonical Headroom | Deployment | [`0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`](https://explorer-studio.genlayer.com/tx/0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929) | Yes | Yes | Contract created at canonical address | [Contract explorer](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C); source hash above |
-| Create/bond covenant | `create_covenant` | NOT EXECUTED | — | — | Waiting for a service operated by the provider and relevant truthful evidence | No covenant exists in initial deployed state |
-| Deterministic prevention | `request_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Must inspect post-state and `prevented` count |
-| Semantic prevention | `review_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Requires truthful, currently unsafe evidence |
-| SAFE admission | `request_reservation` + `review_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Must record actual reservation and frozen evidence |
-| Change preflight | `propose_change` + `review_change` | NOT EXECUTED | — | — | Not yet demonstrated live | Permit must precede its window |
-| Incident opening | `open_incident` | NOT EXECUTED | — | — | No qualifying miss documented | Never infer from user-entered metric |
-| Measurement verification | `verify_incident_measurement` | NOT EXECUTED | — | — | Not yet demonstrated live | Needs an actual measured miss in an active window |
-| Frozen exception | `claim_exception` | NOT EXECUTED | — | — | Not yet demonstrated live | Requires frozen rule and authorized evidence |
-| Incident examination | `examine_incident` | NOT EXECUTED | — | — | Not yet demonstrated live | GenLayer facts only; contract determines money |
-| Deterministic liability | `judge_liability` | NOT EXECUTED | — | — | Not yet demonstrated live | Calculated from consensus facts |
-| Challenge | `challenge_liability` + `resolve_challenge` | NOT EXECUTED | — | — | No truthful counter-evidence submitted | Do not manufacture disagreement |
-| Settlement | `finalize_incident` | NOT EXECUTED | — | — | Not yet demonstrated live | Needs legitimate completed incident path |
-| Withdrawal | `withdraw_credit` | NOT EXECUTED | — | — | No credit to withdraw in initial state | Await user wallet approval if credit later exists |
+| Create/bond covenant | `create_covenant` | NOT EXECUTED | - | - | Waiting for a service operated by the provider and relevant truthful evidence | No covenant exists in initial deployed state |
+| Deterministic prevention | `request_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Must inspect post-state and `prevented` count |
+| Semantic prevention | `review_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Requires truthful, currently unsafe evidence |
+| SAFE admission | `request_reservation` + `review_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Must record actual reservation and frozen evidence |
+| Change preflight | `propose_change` + `review_change` | NOT EXECUTED | - | - | Not yet demonstrated live | Permit must precede its window |
+| Incident opening | `open_incident` | NOT EXECUTED | - | - | No qualifying miss documented | Never infer from user-entered metric |
+| Measurement verification | `verify_incident_measurement` | NOT EXECUTED | - | - | Not yet demonstrated live | Needs an actual measured miss in an active window |
+| Frozen exception | `claim_exception` | NOT EXECUTED | - | - | Not yet demonstrated live | Requires frozen rule and authorized evidence |
+| Incident examination | `examine_incident` | NOT EXECUTED | - | - | Not yet demonstrated live | GenLayer facts only; contract determines money |
+| Deterministic liability | `judge_liability` | NOT EXECUTED | - | - | Not yet demonstrated live | Calculated from consensus facts |
+| Challenge | `challenge_liability` + `resolve_challenge` | NOT EXECUTED | - | - | No truthful counter-evidence submitted | Do not manufacture disagreement |
+| Settlement | `finalize_incident` | NOT EXECUTED | - | - | Not yet demonstrated live | Needs legitimate completed incident path |
+| Withdrawal | `withdraw_credit` | NOT EXECUTED | - | - | No credit to withdraw in initial state | Await user wallet approval if credit later exists |
 
 ## Evidence source research
 

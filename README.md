@@ -2,7 +2,7 @@
   <img src="branding/headroom-logo.svg" alt="HEADROOM" width="300" />
 </p>
 
-# HEADROOM — Preventive SLA Admission & Enforcement
+# HEADROOM - Preventive SLA Admission & Enforcement
 
 **Don’t promise what you can’t serve.** HEADROOM controls whether SLA-backed service commitments and operational exceptions may exist before risk is taken. If prevention fails, the same frozen covenant governs incident facts and deterministic settlement.
 
@@ -122,14 +122,14 @@ The pinned `genvm-linter==0.11.1rc2` validation gate permits only the reviewed s
 
 ## Repository Map
 
-- `contracts/` — single substantial GenLayer Intelligent Contract
-- `frontend/` — Next.js App Router control room, structured evidence forms, injected wallet
-- `tests/direct/` — deterministic and adversarial Direct Mode coverage
-- `tests/integration/` — opt-in live Studionet read/smoke checks
-- `deploy/` — stable Studionet deployment tooling
-- `docs/` — architecture, security, live-demo and reviewer evidence
-- `branding/` — reusable HEADROOM brand assets
-- `scripts/` — source checks and pinned lint/release gates
+- `contracts/` - single substantial GenLayer Intelligent Contract
+- `frontend/` - Next.js App Router control room, structured evidence forms, injected wallet
+- `tests/direct/` - deterministic and adversarial Direct Mode coverage
+- `tests/integration/` - opt-in live Studionet read/smoke checks
+- `deploy/` - stable Studionet deployment tooling
+- `docs/` - architecture, security, live-demo and reviewer evidence
+- `branding/` - reusable HEADROOM brand assets
+- `scripts/` - source checks and pinned lint/release gates
 
 ## License
 
