@@ -219,6 +219,13 @@ def test_unavailable_measurement_has_bounded_liveness_and_can_be_dismissed(direc
     assert c.get_incident(iid)["status"] == "MEASUREMENT_REJECTED"
     assert c.get_reservation(rid)["incident_id"] == ""
 
+def test_evidence_digest_commits_exact_evaluated_prefix(direct_vm, direct_deploy, direct_alice):
+    source = open(CONTRACT, encoding="utf-8").read()
+    assert "MAX_EVIDENCE_CHARS=18000" in source
+    assert "evaluated=t[:MAX_EVIDENCE_CHARS]" in source
+    assert '"content":evaluated,"hash":_hash(evaluated)' in source
+    assert "t[:26000]" not in source
+
 
 def test_unanswered_verified_incident_defaults_to_reserved_credit(direct_vm, direct_deploy, direct_alice, direct_bob):
     c, cid, rid = active_reservation(direct_vm, direct_deploy, direct_alice, direct_bob)
@@ -228,6 +235,40 @@ def test_unanswered_verified_incident_defaults_to_reserved_credit(direct_vm, dir
     assert out["liable_bps"] == 10000
     assert c.get_incident(iid)["status"] == "FINAL"
     assert c.get_credit(hx(direct_bob)) == str(10**18)
+    with direct_vm.expect_revert("incident is not eligible"):
+        c.finalize_default_breach(iid)
+    direct_vm.sender = direct_bob
+    c.withdraw_credit(hx(direct_bob))
+    with direct_vm.expect_revert("no claimable credit"):
+        c.withdraw_credit(hx(direct_bob))
+    assert c.get_stats()["accounting_balanced"] is True
+
+def test_exam_inconclusive_defaults_only_after_resolution_deadline(direct_vm, direct_deploy, direct_alice, direct_bob):
+    c, cid, rid = active_reservation(direct_vm, direct_deploy, direct_alice, direct_bob)
+    iid = verified_incident(direct_vm, c, rid, direct_bob)
+    direct_vm.sender = direct_alice; c.claim_exception(iid, "UPSTREAM", UPSTREAM, "")
+    direct_vm.mock_web(r".*", {"status":200, "body":"Exception evidence cannot currently be evaluated."})
+    direct_vm.mock_llm(r".*", json.dumps({"result":"INCONCLUSIVE","impact_start":0,"impact_end":0,"exception_start":0,"exception_end":0,"service_affected":False,"exception_event_established":False,"causal_link_supported":False,"clause_rule_satisfied":False,"permit_matches":False,"source_conflict":False,"basis":"unresolved"}))
+    assert c.examine_incident(iid)["result"] == "INCONCLUSIVE"
+    with direct_vm.expect_revert("retry window"):
+        c.finalize_default_breach(iid)
+    direct_vm.warp("2026-09-23T00:00:00Z"); direct_vm.clear_mocks()
+    out = c.finalize_default_breach(iid)
+    assert out["liable_bps"] == 10000 and c.get_incident(iid)["status"] == "FINAL"
+    assert c.get_reservation(rid)["status"] == "SETTLED" and c.get_credit(hx(direct_bob)) == str(10**18)
+    assert c.get_stats()["accounting_balanced"] is True
+
+def test_exception_source_unavailable_defaults_only_after_resolution_deadline(direct_vm, direct_deploy, direct_alice, direct_bob):
+    c, cid, rid = active_reservation(direct_vm, direct_deploy, direct_alice, direct_bob)
+    iid = verified_incident(direct_vm, c, rid, direct_bob)
+    direct_vm.sender = direct_alice; c.claim_exception(iid, "UPSTREAM", UPSTREAM, "")
+    direct_vm.mock_web(r".*", {"status":200, "body":""})
+    assert c.examine_incident(iid)["result"] == "SOURCE_UNAVAILABLE"
+    with direct_vm.expect_revert("retry window"):
+        c.finalize_default_breach(iid)
+    direct_vm.warp("2026-09-23T00:00:00Z"); direct_vm.clear_mocks()
+    out = c.finalize_default_breach(iid)
+    assert out["liable_bps"] == 10000 and c.get_incident(iid)["liability_result"] == "DEFAULT_LIABLE"
     assert c.get_stats()["accounting_balanced"] is True
 
 
@@ -246,6 +287,8 @@ def test_partial_causation_moves_only_deterministically_calculated_credit(direct
     assert out["liable_bps"] == 2945
     assert out["payout_atto"] == str(2945 * 10**14)
     assert c.get_credit(hx(direct_bob)) == str(2945 * 10**14)
+    with direct_vm.expect_revert("not finalizable"):
+        c.finalize_incident(iid)
     assert c.get_stats()["accounting_balanced"] is True
 
 
@@ -261,6 +304,8 @@ def test_undecidable_challenge_cannot_grief_settlement_forever(direct_vm, direct
     ch = json.loads(c.get_incident(iid)["challenge"])
     assert ch["status"] == "EXPIRED"
     assert c.get_credit(hx(direct_bob)) == str(10**16)
+    with direct_vm.expect_revert("challenge resolution window"):
+        c.expire_challenge(iid)
 
 
 def test_stats_expose_prevention_and_no_admin(direct_vm, direct_deploy):

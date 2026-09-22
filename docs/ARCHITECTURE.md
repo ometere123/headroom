@@ -146,3 +146,11 @@ The public landing page explains the mechanism and reads live contract totals wi
 Human times use explicit UTC or UTC+1 and date-time controls. Duration fields use minutes, hours, or days. The frontend converts those values to Unix seconds only at the contract call boundary. Evidence rows, origin/class registry entries, and exception clauses are typed browser state serialized at the call boundary; raw JSON appears only as an advanced read-only/copyable representation.
 
 The actual contract argument schema is unchanged. The landing/control/service/settlement surfaces read from the canonical address. Empty state means the chain returned no records, and read failure is surfaced instead of replaced with synthetic state.
+
+## Stage-specific non-decision semantics
+
+Measurement and exception examination have different burdens. Before a miss is independently verified, unavailable measurement evidence cannot prove customer impact and the bounded retry may end in dismissal with no liability. Once a miss is verified, the provider carries the burden of proving a frozen affirmative exception. An unavailable or inconclusive examination is not an immediate liability decision, but unresolved defence evidence after the bounded resolution deadline defaults the already verified miss to full provider liability. Challenge unavailability never changes an existing allocation; challenge expiry refunds the bond and permits the original allocation to finalize.
+
+## Evidence digest boundary
+
+`_fetch()` defines one evaluated-content boundary: `MAX_EVIDENCE_CHARS = 18000`. It stores the bounded prefix and computes SHA-256 over that exact prefix. The semantic input and commitment cannot diverge through an unseen suffix.

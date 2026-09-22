@@ -134,3 +134,11 @@ The pinned `genvm-linter==0.11.1rc2` validation gate permits only the reviewed s
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## Stage-specific burden of proof
+
+HEADROOM treats non-decision states according to the stage of the protocol. During measurement, `SOURCE_UNAVAILABLE` means the customer has not yet proven a miss. The incident remains retryable and can become `MEASUREMENT_REJECTED` without creating liability. After measurement reaches `VERIFIED`, an exception is an affirmative provider defence. `EXAM_INCONCLUSIVE` and exception `SOURCE_UNAVAILABLE` remain non-decisions during the bounded retry window; if the provider still cannot establish its frozen exception by the deadline, `finalize_default_breach()` records `DEFAULT_LIABLE` at 10000 basis points. An inconclusive challenge leaves the established allocation unchanged, and expiry returns the challenger bond.
+
+## Evidence commitment boundary
+
+Each fetched evidence document is bounded to `MAX_EVIDENCE_CHARS` characters (18,000). HEADROOM hashes exactly the evaluated prefix supplied to semantic validators. The commitment therefore has the same boundary as the semantic input and does not claim to hash invisible remote content.

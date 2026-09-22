@@ -8,6 +8,7 @@ from datetime import datetime,timezone
 VERSION="0.1.0-studionet";NETWORK_ID = "61999";RPC_URL = "https://studio.genlayer.com/api"
 MIN_PROVIDER_BOND=10**16;MAX_PROVIDER_BOND=1000*10**18;MIN_CREDIT=10**14;MAX_PAGE=30;MAX_SOURCES=8;MAX_SOURCE_REGISTRY=32;MAX_EXCEPTIONS=8;MAX_ACTIVE=64;CHALLENGE_MIN=600;CHALLENGE_MAX=86400;PROVIDER_RESPONSE_SECONDS=3600;ADJUDICATION_GRACE_SECONDS=24*3600;MEASUREMENT_RETRY_SECONDS=6*3600;CHALLENGE_RESOLUTION_GRACE_SECONDS=24*3600
 FORMATION_LEAD_SECONDS=300
+MAX_EVIDENCE_CHARS=18000
 ADMISSION_RESULTS=("SAFE","UNSAFE","INCONCLUSIVE","SOURCE_UNAVAILABLE")
 MEASUREMENT_RESULTS=("VERIFIED","NOT_PROVEN","SOURCE_UNAVAILABLE")
 EXAM_RESULTS=("VERIFIED","INCONCLUSIVE","SOURCE_UNAVAILABLE")
@@ -123,7 +124,8 @@ def _fetch(items):
         try:t=str(gl.nondet.web.render(x["url"],mode="text"))
         except Exception:return [],x["id"]
         if not t.strip():return [],x["id"]
-        out.append({**x,"content":t[:18000],"hash":_hash(t[:26000])})
+        evaluated=t[:MAX_EVIDENCE_CHARS]
+        out.append({**x,"content":evaluated,"hash":_hash(evaluated)})
     return out,""
 def _admission(raw):
     if isinstance(raw,str):
@@ -430,21 +432,25 @@ class Headroom(gl.Contract):
 
     @gl.public.write
     def examine_incident(self,incident_id:str)->dict:
+        # An unavailable or inconclusive examination is a non-decision during
+        # bounded retry. After a verified miss, the provider bears the burden
+        # of proving its frozen affirmative exception; an unresolved defence
+        # therefore defaults to full liability only after the deadline.
         i=self._i(incident_id);cv=self._cv(i["covenant_id"])
         if i["status"] not in ("EXCEPTION_CLAIMED","EXAM_INCONCLUSIVE","SOURCE_UNAVAILABLE"):raise gl.vm.UserError("[EXPECTED] incident is not ready for examination")
         clause=next(x for x in cv["exceptions"] if x["code"]==i["exception_code"]);permit=i.get("permitted_change",{});evidence=i["measurement_evidence"]+i["exception_evidence"]+([{"id":"PERMIT","url":permit["evidence_url"],"kind":"CHANGE_PERMIT","note":"frozen permitted change evidence"}] if permit else [])
         def leader_fn()->dict:
             pages,missing=_fetch(evidence)
-            if missing:return {"result":"SOURCE_UNAVAILABLE","impact_start":0,"impact_end":0,"exception_start":0,"exception_end":0,"service_affected":False,"exception_event_established":False,"causal_link_supported":False,"clause_rule_satisfied":False,"permit_matches":False,"source_conflict":False,"basis":f"source {missing} unavailable"}
+            if missing:return {"result":"SOURCE_UNAVAILABLE","impact_start":0,"impact_end":0,"exception_start":0,"exception_end":0,"service_affected":False,"exception_event_established":False,"causal_link_supported":False,"clause_rule_satisfied":False,"permit_matches":False,"source_conflict":False,"evidence_hashes":[],"basis":f"source {missing} unavailable"}
             prompt="""Reconstruct the factual incident timeline before deciding contractual liability. Establish customer/service impact timing, the invoked exception event timing, whether the service was affected, whether the exception event itself is established, whether evidence supports a causal link, whether the frozen clause rule itself is satisfied, whether a required permitted change matches, and whether material sources conflict. Return JSON only with result VERIFIED|INCONCLUSIVE|SOURCE_UNAVAILABLE, impact_start, impact_end, exception_start, exception_end Unix integers, service_affected bool, exception_event_established bool, causal_link_supported bool, clause_rule_satisfied bool, permit_matches bool, source_conflict bool, basis.\nFROZEN EXCEPTION:\n"""+_json(clause)+"\nMEASURED WINDOW:\n"+_json({"from":i["observed_from"],"to":i["observed_to"],"actual_availability_bps":i["actual_availability_bps"]})+"\nFROZEN PERMITTED CHANGE:\n"+_json(i.get("permitted_change",{}))+"\nEVIDENCE:\n"+_json(pages)
-            return _exam(gl.nondet.exec_prompt(prompt,response_format="json"),int(i["observed_from"]),int(i["observed_to"]))
+            parsed=_exam(gl.nondet.exec_prompt(prompt,response_format="json"),int(i["observed_from"]),int(i["observed_to"]));parsed["evidence_hashes"]=[p["hash"] for p in pages];return parsed
         def validator_fn(leader_result)->bool:
             try:
                 if not isinstance(leader_result,glvm.Return):return False
                 mine=leader_fn();theirs=leader_result.calldata;keys=("result","impact_start","impact_end","exception_start","exception_end","service_affected","exception_event_established","causal_link_supported","clause_rule_satisfied","permit_matches","source_conflict");return all(mine[k]==theirs.get(k) for k in keys)
             except Exception:
                 return False
-        result=glvm.run_nondet_unsafe(leader_fn,validator_fn);i["examination"]=result;i["basis"]=result["basis"];i["incident_case_hash"]=_hash(_json({"spec_hash":cv["spec_hash"],"incident":i["id"],"reservation":i["reservation_id"],"observed_from":i["observed_from"],"observed_to":i["observed_to"],"exception_code":i["exception_code"],"sources":evidence,"permit_hash":i.get("permitted_change",{}).get("permit_hash","")}))
+        result=glvm.run_nondet_unsafe(leader_fn,validator_fn);i["examination"]=result;i["basis"]=result["basis"];i["incident_case_hash"]=_hash(_json({"spec_hash":cv["spec_hash"],"incident":i["id"],"reservation":i["reservation_id"],"observed_from":i["observed_from"],"observed_to":i["observed_to"],"exception_code":i["exception_code"],"sources":evidence,"evidence_hashes":result.get("evidence_hashes",[]),"permit_hash":i.get("permitted_change",{}).get("permit_hash","")}))
         if result["result"]=="VERIFIED":i["status"]="EXAMINED"
         elif result["result"]=="SOURCE_UNAVAILABLE":i["status"]="SOURCE_UNAVAILABLE"
         else:i["status"]="EXAM_INCONCLUSIVE"
@@ -531,6 +537,9 @@ class Headroom(gl.Contract):
 
     @gl.public.write
     def finalize_default_breach(self,incident_id:str)->dict:
+        # This is not an immediate SOURCE_UNAVAILABLE decision. It is the
+        # bounded liveness exit for an independently verified miss whose
+        # provider exception defence remained unproven.
         i=self._i(incident_id);r=self._r(i["reservation_id"]);cv=self._cv(i["covenant_id"]);now=_now()
         if i["status"]=="OPEN":
             if now<int(i["response_deadline"]):raise gl.vm.UserError("[EXPECTED] provider response window is still open")

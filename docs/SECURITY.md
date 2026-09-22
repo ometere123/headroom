@@ -35,3 +35,9 @@ HEADROOM uses prevention before adjudication. Deterministic capacity/collateral 
 The canonical contract deployment and source/schema match are verified; the deployed starting state has no covenants or lifecycle transactions. Real covenant, prevention, admission, change preflight, and incident settlement actions require user-approved wallet transactions and truthful evidence. Do not claim any until its transaction is finalized with successful execution and post-state is re-read. See `docs/REVIEW_EVIDENCE.md` for the chronological record.
 
 Frontend validation is a convenience boundary, not authority. The contract remains authoritative for origin/class policy, timing, headroom, collateral, state transitions and accounting. Human source and exception builders serialize to the existing contract arguments without changing its trust model.
+
+## Burden of proof and bounded exits
+
+`MEASUREMENT_PENDING` and measurement `SOURCE_UNAVAILABLE` do not establish a miss. They retry and may be dismissed without liability. Exception `EXAM_INCONCLUSIVE` or exception `SOURCE_UNAVAILABLE` occurs only after a verified miss and means the provider has not yet proven its affirmative frozen exception. It therefore has a bounded retry period, followed by `DEFAULT_LIABLE` if unresolved. Challenge non-decisions preserve the allocation and expire with the challenger bond returned.
+
+Evidence hashes use the exact 18,000-character evaluated prefix (`MAX_EVIDENCE_CHARS`).
