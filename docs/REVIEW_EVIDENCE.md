@@ -12,7 +12,8 @@
 | Deployment transaction | [`0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`](https://explorer-studio.genlayer.com/tx/0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e) |
 | Deployment status | FINALIZED; execution SUCCESS; 3 AGREE, 2 IDLE |
 | Contract source commit | `add2f35d08cde554bec6d9bed98c5094554035d9` |
-| Final application commit | 3023e17cc78f3224f196495dbbd3be3151efa2e | 
+| Frontend implementation commit | `f6b9cf5c57348c956c4a559ab12e7ecb6aca8aa7` |
+| Final release HEAD | `35ad7f348660098755647fb957b22c12134a5f5f` |
 | Deployed source SHA-256 | `a61cb6815251ac3f118fb73fe81c9e10b7575c13ab3135e7664ebcdd9b587dbd` |
 | Source match | Retrieved deployed source equals `contracts/headroom.py` at the source commit byte for byte |
 | Schema | 31 methods: 10 views and 21 writes |
