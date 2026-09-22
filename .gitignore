@@ -13,3 +13,4 @@ frontend/tsconfig.tsbuildinfo
 .work-preserve-*/
 .tmp-*
 .lint-stable/
+.vercel
