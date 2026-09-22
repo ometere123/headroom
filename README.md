@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="branding/headroom-logo.svg" alt="HEADROOM" width="300" />
+  <img src="branding/headroom-mark.svg" alt="HEADROOM" width="300" />
 </p>
 
 # HEADROOM - Preventive SLA Admission & Enforcement
