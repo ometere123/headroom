@@ -3,9 +3,9 @@
 ## Canonical deployment
 
 - Network: GenLayer Studionet, chain 61999; RPC `https://studio.genlayer.com/api`.
-- Contract: `0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C`.
-- Deployment transaction: `0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`; FINALIZED and successful execution.
-- The deployed contract source exactly matches `contracts/headroom.py` from source commit `7aecd8f4312557de504de2709d04f646c102dce0` (SHA-256 `461fc74172e1d4a8a3e36d344280bc4e1cb22afd8ac44d9ea750138ee3954abe`). Frontend and documentation work does not require a contract redeployment.
+- Contract: `0x235Fd204E6d78e61055a6BD24B06319aA503D2f1`.
+- Deployment transaction: `0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`; FINALIZED and successful execution.
+- The deployed contract source exactly matches `contracts/headroom.py` from source commit `add2f35d08cde554bec6d9bed98c5094554035d9` (SHA-256 `a61cb6815251ac3f118fb73fe81c9e10b7575c13ab3135e7664ebcdd9b587dbd`). Frontend and documentation work does not require a contract redeployment.
 - Deployed schema: 31 methods, 10 views and 21 writes. Deployed `get_stats()` reports Studionet/61999, `accounting_balanced=true`, and `admin_controls=false`.
 
 ## Release candidate
@@ -17,7 +17,7 @@ The app uses an infrastructure operations shell with a persistent operations rai
 | Stable network lock | Studionet 61999 only |
 | Contract source / deployment match | Verified; contract unchanged since deployed source commit |
 | Contract methods | 10 views / 21 writes |
-| Direct Mode | 54 passed on Python 3.12.3 |
+| Direct Mode | 57 passed on Python 3.12.3 |
 | GenVM validation/lint | `genvm-linter==0.11.1rc2`: validation passes; wrapper passes with exactly seven reviewed E010 diagnostics |
 | Static release/pattern/frontend checks | PASS |
 | Frontend typecheck/build | PASS |
@@ -25,4 +25,4 @@ The app uses an infrastructure operations shell with a persistent operations rai
 | Production deploy/browser walkthrough | READY; existing Vercel project deployed to https://the-headroom.vercel.app/ and browser routes/live reads/wallet connection exercised |
 | Live contract writes | Awaiting the user’s wallet approval when a real operation is prepared |
 
-The canonical contract currently has no covenants or lifecycle records. No incident, semantic decision, admission, settlement, or withdrawal is claimed until a real finalized transaction establishes it. Current release source commit: `77a864ae996d3215e386a33ea47349bf16c12bd2`; CI run [35653626978](https://github.com/ometere123/headroom/actions/runs/35653626978) is green. A documentation-only evidence synchronization commit follows this verified source revision.
+The canonical contract currently has no covenants or lifecycle records. No incident, semantic decision, admission, settlement, or withdrawal is claimed until a real finalized transaction establishes it. Current release source commit: `add2f35d08cde554bec6d9bed98c5094554035d9`; CI run [35690301279](https://github.com/ometere123/headroom/actions/runs/35690301279) is green. A documentation-only evidence synchronization commit follows this verified source revision.

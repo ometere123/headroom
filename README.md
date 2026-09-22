@@ -6,7 +6,7 @@
 
 **Don’t promise what you can’t serve.** HEADROOM controls whether SLA-backed service commitments and operational exceptions may exist before risk is taken. If prevention fails, the same frozen covenant governs incident facts and deterministic settlement.
 
-**Live app:** [the-headroom.vercel.app](https://the-headroom.vercel.app/) · **Protocol:** [Studionet explorer](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C)
+**Live app:** [the-headroom.vercel.app](https://the-headroom.vercel.app/) · **Protocol:** [Studionet explorer](https://explorer-studio.genlayer.com/address/0x235Fd204E6d78e61055a6BD24B06319aA503D2f1)
 
 ## What HEADROOM Does
 
@@ -75,10 +75,10 @@ A bonded challenge submits counter-evidence and re-fetches the original measurem
 | Chain ID | `61999` |
 | RPC | `https://studio.genlayer.com/api` |
 | Explorer | [explorer-studio.genlayer.com](https://explorer-studio.genlayer.com) |
-| Contract | [`0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C`](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C) |
-| Deployment transaction | [`0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`](https://explorer-studio.genlayer.com/tx/0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929) |
-| Contract source commit | `7aecd8f4312557de504de2709d04f646c102dce0` |
-| Contract source SHA-256 | `461fc74172e1d4a8a3e36d344280bc4e1cb22afd8ac44d9ea750138ee3954abe` |
+| Contract | [`0x235Fd204E6d78e61055a6BD24B06319aA503D2f1`](https://explorer-studio.genlayer.com/address/0x235Fd204E6d78e61055a6BD24B06319aA503D2f1) |
+| Deployment transaction | [`0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`](https://explorer-studio.genlayer.com/tx/0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e) |
+| Contract source commit | `add2f35d08cde554bec6d9bed98c5094554035d9` |
+| Contract source SHA-256 | `a61cb6815251ac3f118fb73fe81c9e10b7575c13ab3135e7664ebcdd9b587dbd` |
 | Frontend | [the-headroom.vercel.app](https://the-headroom.vercel.app/) |
 
 Deployment receipt is FINALIZED with successful execution. The deployed source matches `contracts/headroom.py` at the source commit above; the deployed schema exposes 31 methods (10 views and 21 writes). `get_stats()` reports Studionet / 61999, balanced accounting, and no admin controls. See [review evidence](docs/REVIEW_EVIDENCE.md) for the verified receipt and state. Live semantic admission and economic lifecycle evidence are recorded only after those actions have occurred.
@@ -94,7 +94,7 @@ pip install -r requirements.txt
 pytest tests/direct/ -v
 cd frontend
 npm install
-$env:NEXT_PUBLIC_HEADROOM_CONTRACT="0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C"
+$env:NEXT_PUBLIC_HEADROOM_CONTRACT="0x235Fd204E6d78e61055a6BD24B06319aA503D2f1"
 $env:NEXT_PUBLIC_GENLAYER_CHAIN_ID="61999"
 $env:NEXT_PUBLIC_GENLAYER_RPC_URL="https://studio.genlayer.com/api"
 $env:NEXT_PUBLIC_GENLAYER_EXPLORER="https://explorer-studio.genlayer.com"

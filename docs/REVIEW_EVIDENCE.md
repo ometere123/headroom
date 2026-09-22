@@ -8,11 +8,11 @@
 | Chain ID | `61999` |
 | RPC | `https://studio.genlayer.com/api` |
 | Explorer | [explorer-studio.genlayer.com](https://explorer-studio.genlayer.com) |
-| Contract | [`0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C`](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C) |
-| Deployment transaction | [`0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`](https://explorer-studio.genlayer.com/tx/0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929) |
+| Contract | [`0x235Fd204E6d78e61055a6BD24B06319aA503D2f1`](https://explorer-studio.genlayer.com/address/0x235Fd204E6d78e61055a6BD24B06319aA503D2f1) |
+| Deployment transaction | [`0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`](https://explorer-studio.genlayer.com/tx/0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e) |
 | Deployment status | FINALIZED; execution SUCCESS; 3 AGREE, 2 IDLE |
-| Contract source commit | `7aecd8f4312557de504de2709d04f646c102dce0` |
-| Deployed source SHA-256 | `461fc74172e1d4a8a3e36d344280bc4e1cb22afd8ac44d9ea750138ee3954abe` |
+| Contract source commit | `add2f35d08cde554bec6d9bed98c5094554035d9` |
+| Deployed source SHA-256 | `a61cb6815251ac3f118fb73fe81c9e10b7575c13ab3135e7664ebcdd9b587dbd` |
 | Source match | Retrieved deployed source equals `contracts/headroom.py` at the source commit byte for byte |
 | Schema | 31 methods: 10 views and 21 writes |
 | CLI | GenLayer CLI 0.39.1; network config Studionet / 61999 / stable RPC |
@@ -53,7 +53,7 @@ Release evidence for the current candidate is recorded below. Re-run checks afte
 | Check | Result |
 | --- | --- |
 | Python | 3.12.3 |
-| Direct Mode | `genlayer-test==0.29.2`, `genlayer-py==0.16.3`; 54 passed |
+| Direct Mode | `genlayer-test==0.29.2`, `genlayer-py==0.16.3`; 57 passed |
 | GenVM lint | `genvm-linter==0.11.1rc2`; validation passed, 31 methods; wrapper PASS, exact seven reviewed E010 lint diagnostics only (validation also notes I200: a newer runner is available) |
 | `py_compile` | PASS for contract, direct tests, integration tests |
 | `check_release.py` | PASS; Studionet 61999 stable RPC |
@@ -61,7 +61,7 @@ Release evidence for the current candidate is recorded below. Re-run checks afte
 | `check_frontend_surface.py` | PASS; 6 required route patterns and 13 protocol actions checked |
 | Frontend SDK | exact `genlayer-js==1.1.8` |
 | Frontend typecheck/build | PASS; Next.js production build generated all routes |
-| GitHub Actions | PASS, [run 35653626978](https://github.com/ometere123/headroom/actions/runs/35653626978), commit `77a864ae996d3215e386a33ea47349bf16c12bd2` |
+| GitHub Actions | PASS, [run 35690301279](https://github.com/ometere123/headroom/actions/runs/35690301279), commit `add2f35d08cde554bec6d9bed98c5094554035d9` |
 | Vercel | existing project `headroom`, root `frontend`; four Production variables configured; deployment READY at [production URL](https://the-headroom.vercel.app/); `/` and `/control` return HTTP 200 |
 | Browser walkthrough | Production home and operational routes loaded; live contract reads, wallet connection and UTC preference exercised; no write transaction submitted |
 
@@ -71,7 +71,7 @@ The deployment transaction is the only protocol transaction in this record. Empt
 
 | Action | Method | Transaction | Finalized? | Execution success? | Result | Evidence / state |
 | --- | --- | --- | --- | --- | --- | --- |
-| Deploy canonical Headroom | Deployment | [`0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`](https://explorer-studio.genlayer.com/tx/0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929) | Yes | Yes | Contract created at canonical address | [Contract explorer](https://explorer-studio.genlayer.com/address/0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C); source hash above |
+| Deploy canonical Headroom | Deployment | [`0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`](https://explorer-studio.genlayer.com/tx/0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e) | Yes | Yes | Contract created at canonical address | [Contract explorer](https://explorer-studio.genlayer.com/address/0x235Fd204E6d78e61055a6BD24B06319aA503D2f1); source hash above |
 | Create/bond covenant | `create_covenant` | NOT EXECUTED | - | - | Waiting for a service operated by the provider and relevant truthful evidence | No covenant exists in initial deployed state |
 | Deterministic prevention | `request_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Must inspect post-state and `prevented` count |
 | Semantic prevention | `review_reservation` | NOT EXECUTED | - | - | Not yet demonstrated live | Requires truthful, currently unsafe evidence |
@@ -94,6 +94,6 @@ No controlled outage, fabricated status page, edited evidence timestamp, or hist
 
 ## Production deployment and browser verification
 
-The existing Vercel project (`headroom`, root directory `frontend`) has the four required Production variables configured for the canonical contract and Studionet. Production is publicly reachable at [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/). Its latest deployment for source commit `77a864ae996d3215e386a33ea47349bf16c12bd2` is READY and aliases the production domain. The production interface was opened in a browser; home, control, service, admission, change, incident, settlement and protocol routes were exercised. The injected EIP-1193 wallet connected and chain reads returned the deployed state after load. No protocol write was sent.
+The existing Vercel project (`headroom`, root directory `frontend`) has the four required Production variables configured for the canonical contract and Studionet. Production is publicly reachable at [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/). Its latest deployment for source commit `add2f35d08cde554bec6d9bed98c5094554035d9` is READY and aliases the production domain. The production interface was opened in a browser; home, control, service, admission, change, incident, settlement and protocol routes were exercised. The injected EIP-1193 wallet connected and chain reads returned the deployed state after load. No protocol write was sent.
 
 The read-only integration smoke path uses `genlayer-js==1.1.8` unsigned `readContract`, because `genlayer-py==0.16.3` currently raises `No account provided` on views. The SDK read was verified against the canonical deployment; full Python/Node cross-runtime smoke orchestration remains environment-dependent and is not reported as a passing integration-suite run.

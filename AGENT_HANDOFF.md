@@ -5,9 +5,9 @@ HEADROOM is a preventive SLA admission and enforcement protocol: deterministic c
 ## Canonical release facts
 
 - Studionet only: chain `61999`, RPC `https://studio.genlayer.com/api`.
-- Contract: `0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C`.
-- Deployment transaction: `0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`.
-- Deployment is FINALIZED and execution succeeded. Deployed source hash matches `contracts/headroom.py` from source commit `7aecd8f4312557de504de2709d04f646c102dce0`; schema: 10 views / 21 writes.
+- Contract: `0x235Fd204E6d78e61055a6BD24B06319aA503D2f1`.
+- Deployment transaction: `0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`.
+- Deployment is FINALIZED and execution succeeded. Deployed source hash matches `contracts/headroom.py` from source commit `add2f35d08cde554bec6d9bed98c5094554035d9`; schema: 10 views / 21 writes.
 - Vercel project: existing `headroom` project, root `frontend`, production domain `https://the-headroom.vercel.app/`.
 - Stable stack only: CLI 0.39.1, JS SDK 1.1.8, Python 3.12, Direct Mode `genlayer-test==0.29.2`, `genlayer-py==0.16.3`, linter `genvm-linter==0.11.1rc2`.
 

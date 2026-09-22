@@ -2,7 +2,7 @@
 
 ## Canonical contract
 
-The deployed Studionet contract `0x4d300dF9aCADC904DfC9473F0D970bd6CB1c122C` was finalized successfully by transaction `0x571288f46cef612de2ff24cf120a2ddeb922a3ce1e9b5200bb2c05668ee6b929`. Deployed source SHA-256 is `461fc74172e1d4a8a3e36d344280bc4e1cb22afd8ac44d9ea750138ee3954abe`, matching repository `contracts/headroom.py` at source commit `7aecd8f4312557de504de2709d04f646c102dce0`. Its schema is 10 views and 21 writes. Live `get_stats()` reports Studionet, chain 61999, balanced accounting, and no admin controls.
+The deployed Studionet contract `0x235Fd204E6d78e61055a6BD24B06319aA503D2f1` was finalized successfully by transaction `0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`. Deployed source SHA-256 is `a61cb6815251ac3f118fb73fe81c9e10b7575c13ab3135e7664ebcdd9b587dbd`, matching repository `contracts/headroom.py` at source commit `add2f35d08cde554bec6d9bed98c5094554035d9`. Its schema is 10 views and 21 writes. Live `get_stats()` reports Studionet, chain 61999, balanced accounting, and no admin controls.
 
 ## Candidate checks
 
@@ -10,10 +10,10 @@ Record the results for the exact release commit here and in [review evidence](do
 
 - Python 3.12.3 compile: PASS (`contracts/headroom.py`, all direct and integration test modules).
 - GenVM validation: `genvm-linter==0.11.1rc2`; the reviewed exact seven E010 custom validator diagnostics remain the only accepted warnings.
-- Direct Mode: PASS, 54 passed (`genlayer-test==0.29.2`, `genlayer-py==0.16.3`).
+- Direct Mode: PASS, 57 passed (`genlayer-test==0.29.2`, `genlayer-py==0.16.3`).
 - `check_release.py`, `check_contract_patterns.py`, `check_frontend_surface.py`: PASS.
 - Frontend SDK: exact `genlayer-js==1.1.8`; `npm run typecheck` and `npm run build`: PASS.
-- GitHub Actions on release source `77a864ae996d3215e386a33ea47349bf16c12bd2`: PASS, [run 35653626978](https://github.com/ometere123/headroom/actions/runs/35653626978); full Direct Mode and frontend build passed.
+- GitHub Actions on release source `add2f35d08cde554bec6d9bed98c5094554035d9`: PASS, [run 35690301279](https://github.com/ometere123/headroom/actions/runs/35690301279); full Direct Mode and frontend build passed.
 - Vercel Production: existing project linked; four required Production variables confirmed; deployment READY at https://the-headroom.vercel.app/ and browser walkthrough completed for routes, live reads, wallet connection and chain state.
 
 ## Live protocol evidence
