@@ -23,4 +23,3 @@ export function durationSeconds(value: number, unit: "Minutes"|"Hours"|"Days"): 
   if (!Number.isFinite(value) || value < 0) throw new Error("Enter a non-negative duration.");
   return Math.floor(value * factor);
 }
-

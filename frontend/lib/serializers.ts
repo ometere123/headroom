@@ -23,4 +23,3 @@ export function serializeSourceRegistry(rows:RegistryEntry[]){return JSON.string
 export function serializeExceptions(rows:ExceptionClause[]){return JSON.stringify(rows);}
 export function serializeMeasurementEvidence(rows:EvidenceSource[]){return JSON.stringify(rows);}
 export function serializeExceptionEvidence(rows:EvidenceSource[]){return JSON.stringify(rows);}
-

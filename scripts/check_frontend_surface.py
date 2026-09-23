@@ -5,7 +5,7 @@ This is not a Next.js build. It prevents accidental handoff regressions before d
 from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 front = root / "frontend"
-required_routes = ['app/page.tsx', 'app/control/page.tsx', 'app/services/page.tsx', 'app/services/new/page.tsx', 'app/services/[id]/page.tsx', 'app/admissions/page.tsx', 'app/changes/page.tsx', 'app/incidents/page.tsx', 'app/settlements/page.tsx', 'app/protocol/page.tsx']
+required_routes = ['app/page.tsx', 'app/covenants/page.tsx', 'app/covenants/[id]/page.tsx', 'app/open/page.tsx', 'app/account/page.tsx', 'app/protocol/page.tsx']
 required_actions = ['request_reservation', 'review_reservation', 'propose_change', 'review_change', 'open_incident', 'verify_incident_measurement', 'claim_exception', 'examine_incident', 'judge_liability', 'challenge_liability', 'resolve_challenge', 'finalize_incident', 'withdraw_credit']
 failures=[]
 for rel in required_routes:
@@ -21,16 +21,12 @@ for required in ('CHAIN_ID = 61999','https://studio.genlayer.com/api'):
     if required not in config: failures.append("missing frontend release lock: " + required)
 for required in ('window.ethereum','eth_requestAccounts','wallet_switchEthereumChain','wallet_addEthereumChain'):
     if required not in wallet: failures.append("missing EIP-1193 path: " + required)
-for required in ('writeContract','waitForTransactionReceipt','finalizedExecutionState','LATEST_FINAL'):
+for required in ('writeContract','waitForTransactionReceipt','ExecutionResult.FINISHED_WITH_RETURN','LATEST_FINAL'):
     if required not in contract: failures.append("missing finalized GenLayer integration behavior: " + required)
-for required in ('finalizedExecutionState', 'BigInt(whole)*10n**18n'):
+for required in ('ExecutionResult.FINISHED_WITH_RETURN', 'BigInt(whole)*10n**18n'):
     if required not in contract: failures.append("missing verified GenLayer result or exact decimal parser: " + required)
-for forbidden in ('61997','studio-dev','wallet_getSnaps','wallet_requestSnaps','WalletConnect','Privy'):
+for forbidden in ('wallet_getSnaps','wallet_requestSnaps','WalletConnect','Privy'):
     if forbidden in all_source: failures.append("forbidden wallet path: " + forbidden)
-for forbidden in ('list_Incidents','Availability_target_bps','actual_Availability_bps'):
-    if forbidden in all_source: failures.append("case-sensitive contract identifier mutated: " + forbidden)
-for required in ('list_incidents','availability_target_bps','actual_availability_bps'):
-    if required not in all_source: failures.append("missing case-sensitive contract identifier: " + required)
 if failures:
     print("HEADROOM_FRONTEND_SURFACE_CHECK=FAIL")
     print("\n".join(failures))

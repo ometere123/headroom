@@ -16,4 +16,3 @@ export function assertReleaseConfig() {
   const envExplorer = process.env.NEXT_PUBLIC_GENLAYER_EXPLORER || EXPLORER;
   if (envId !== CHAIN_ID || envRpc !== RPC || envExplorer !== "https://explorer-studio.genlayer.com") throw new Error("HEADROOM is locked to Studionet 61999 / stable RPC and explorer");
 }
-

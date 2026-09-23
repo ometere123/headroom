@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="branding/headroom-mark.svg" alt="HEADROOM" width="180" />
+  <img src="branding/headroom-logo.svg" alt="HEADROOM" width="300" />
 </p>
 
-# HEADROOM - Preventive SLA Admission & Enforcement
+# HEADROOM — Preventive SLA Admission & Enforcement
 
 **Don’t promise what you can’t serve.** HEADROOM controls whether SLA-backed service commitments and operational exceptions may exist before risk is taken. If prevention fails, the same frozen covenant governs incident facts and deterministic settlement.
 
-**Live app:** [the-headroom.vercel.app](https://the-headroom.vercel.app/) · **Protocol:** [Studionet explorer](https://explorer-studio.genlayer.com/address/0x235Fd204E6d78e61055a6BD24B06319aA503D2f1)
+**Live app:** [the-headroom.vercel.app](https://the-headroom.vercel.app/) · **Protocol:** [Studionet explorer](https://explorer-studio.genlayer.com/address/0x44f03156B27d92e9527992744207ca73d0E6F980)
 
 ## What HEADROOM Does
 
@@ -75,13 +75,13 @@ A bonded challenge submits counter-evidence and re-fetches the original measurem
 | Chain ID | `61999` |
 | RPC | `https://studio.genlayer.com/api` |
 | Explorer | [explorer-studio.genlayer.com](https://explorer-studio.genlayer.com) |
-| Contract | [`0x235Fd204E6d78e61055a6BD24B06319aA503D2f1`](https://explorer-studio.genlayer.com/address/0x235Fd204E6d78e61055a6BD24B06319aA503D2f1) |
-| Deployment transaction | [`0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e`](https://explorer-studio.genlayer.com/tx/0x99114e7506ca30f35ee1c9bc1f81c7147c56f305fb49c0bed97071c5a1e7545e) |
-| Contract source commit | `add2f35d08cde554bec6d9bed98c5094554035d9` |
-| Contract source SHA-256 | `a61cb6815251ac3f118fb73fe81c9e10b7575c13ab3135e7664ebcdd9b587dbd` |
+| Contract | [`0x44f03156B27d92e9527992744207ca73d0E6F980`](https://explorer-studio.genlayer.com/address/0x44f03156B27d92e9527992744207ca73d0E6F980) |
+| Deployment transaction | [`0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b`](https://explorer-studio.genlayer.com/tx/0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b) |
+| Contract source | Corrected trust-boundary implementation in `contracts/headroom.py` |
+| Contract source SHA-256 | `FD652486B69C65DB6B7AACEF736BFF84C5A9E8456C946B117B95D13CD6FA5D11` |
 | Frontend | [the-headroom.vercel.app](https://the-headroom.vercel.app/) |
 
-Deployment receipt is FINALIZED with successful execution. The deployed source matches `contracts/headroom.py` at the source commit above; the deployed schema exposes 31 methods (10 views and 21 writes). `get_stats()` reports Studionet / 61999, balanced accounting, and no admin controls. See [review evidence](docs/REVIEW_EVIDENCE.md) for the verified receipt and state. Live semantic admission and economic lifecycle evidence are recorded only after those actions have occurred.
+Deployment receipt is FINALIZED with successful execution. The deployed source corresponds to the corrected trust-boundary implementation in `contracts/headroom.py`; the deployed schema exposes 31 methods (10 views and 21 writes). `get_stats()` reports Studionet / 61999, balanced accounting, and no admin controls. See [review evidence](docs/REVIEW_EVIDENCE.md) for the verified receipt and state. Live semantic admission and economic lifecycle evidence are recorded only after those actions have occurred.
 
 ## Run Locally
 
@@ -94,7 +94,7 @@ pip install -r requirements.txt
 pytest tests/direct/ -v
 cd frontend
 npm install
-$env:NEXT_PUBLIC_HEADROOM_CONTRACT="0x235Fd204E6d78e61055a6BD24B06319aA503D2f1"
+$env:NEXT_PUBLIC_HEADROOM_CONTRACT="0x44f03156B27d92e9527992744207ca73d0E6F980"
 $env:NEXT_PUBLIC_GENLAYER_CHAIN_ID="61999"
 $env:NEXT_PUBLIC_GENLAYER_RPC_URL="https://studio.genlayer.com/api"
 $env:NEXT_PUBLIC_GENLAYER_EXPLORER="https://explorer-studio.genlayer.com"
@@ -122,37 +122,15 @@ The pinned `genvm-linter==0.11.1rc2` validation gate permits only the reviewed s
 
 ## Repository Map
 
-- `contracts/` - single substantial GenLayer Intelligent Contract
-- `frontend/` - Next.js App Router control room, structured evidence forms, injected wallet
-- `tests/direct/` - deterministic and adversarial Direct Mode coverage
-- `tests/integration/` - opt-in live Studionet read/smoke checks
-- `deploy/` - stable Studionet deployment tooling
-- `docs/` - architecture, security, live-demo and reviewer evidence
-- `branding/` - reusable HEADROOM brand assets
-- `scripts/` - source checks and pinned lint/release gates
+- `contracts/` — single substantial GenLayer Intelligent Contract
+- `frontend/` — Next.js App Router control room, structured evidence forms, injected wallet
+- `tests/direct/` — deterministic and adversarial Direct Mode coverage
+- `tests/integration/` — opt-in live Studionet read/smoke checks
+- `deploy/` — stable Studionet deployment tooling
+- `docs/` — architecture, security, live-demo and reviewer evidence
+- `branding/` — reusable HEADROOM brand assets
+- `scripts/` — source checks and pinned lint/release gates
 
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
-## Stage-specific burden of proof
-
-HEADROOM treats non-decision states according to the stage of the protocol. During measurement, `SOURCE_UNAVAILABLE` means the customer has not yet proven a miss. The incident remains retryable and can become `MEASUREMENT_REJECTED` without creating liability. After measurement reaches `VERIFIED`, an exception is an affirmative provider defence. `EXAM_INCONCLUSIVE` and exception `SOURCE_UNAVAILABLE` remain non-decisions during the bounded retry window; if the provider still cannot establish its frozen exception by the deadline, `finalize_default_breach()` records `DEFAULT_LIABLE` at 10000 basis points. An inconclusive challenge leaves the established allocation unchanged, and expiry returns the challenger bond.
-
-## Evidence commitment boundary
-
-Each fetched evidence document is bounded to `MAX_EVIDENCE_CHARS` characters (18,000). HEADROOM hashes exactly the evaluated prefix supplied to semantic validators. The commitment therefore has the same boundary as the semantic input and does not claim to hash invisible remote content.
-
-
-## Live Protocol Proof
-
-- Fresh bonded service: `hr-cv-3`
-- Bond: `1 GEN`
-- Safe capacity: `8 units`
-- Deterministic test: `9` unit request
-- Result: `DENIED_DETERMINISTIC` because capacity headroom failed
-- Capacity and liability reserved: `0` and `0 GEN`
-- Semantic test: `hr-r-2` was admitted `SAFE` by GenLayer and is ACTIVE with one unit and `0.1 GEN` reserved liability.
-- Accounting: balanced
-
-See [review evidence](docs/REVIEW_EVIDENCE.md) and [live demo](docs/LIVE_DEMO.md) for transaction details and the bounded live scope.

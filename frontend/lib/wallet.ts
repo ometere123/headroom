@@ -19,4 +19,3 @@ export function useInjectedWallet(){
   const connect=useCallback(async()=>{ const p=provider(); if(!p)throw new Error("No injected EIP-1193 wallet found");setOff(false);const xs=normalizeAccounts(await p.request({method:"eth_requestAccounts"}));if(!xs[0])throw new Error("Wallet returned no account");await ensureStudionet();setAddress(xs[0]);setChainId(CHAIN_ID);return xs[0];},[]);
   return {ready,address,chainId,connected:!!address,correctNetwork:chainId===CHAIN_ID,connect,switchNetwork:ensureStudionet,disconnect:()=>{setOff(true);setAddress(null)},refresh};
 }
-

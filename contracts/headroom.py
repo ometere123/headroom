@@ -8,7 +8,7 @@ from datetime import datetime,timezone
 VERSION="0.1.0-studionet";NETWORK_ID = "61999";RPC_URL = "https://studio.genlayer.com/api"
 MIN_PROVIDER_BOND=10**16;MAX_PROVIDER_BOND=1000*10**18;MIN_CREDIT=10**14;MAX_PAGE=30;MAX_SOURCES=8;MAX_SOURCE_REGISTRY=32;MAX_EXCEPTIONS=8;MAX_ACTIVE=64;CHALLENGE_MIN=600;CHALLENGE_MAX=86400;PROVIDER_RESPONSE_SECONDS=3600;ADJUDICATION_GRACE_SECONDS=24*3600;MEASUREMENT_RETRY_SECONDS=6*3600;CHALLENGE_RESOLUTION_GRACE_SECONDS=24*3600
 FORMATION_LEAD_SECONDS=300
-MAX_EVIDENCE_CHARS=18000
+MIN_REQUESTER_STAKE_BPS=1000
 ADMISSION_RESULTS=("SAFE","UNSAFE","INCONCLUSIVE","SOURCE_UNAVAILABLE")
 MEASUREMENT_RESULTS=("VERIFIED","NOT_PROVEN","SOURCE_UNAVAILABLE")
 EXAM_RESULTS=("VERIFIED","INCONCLUSIVE","SOURCE_UNAVAILABLE")
@@ -42,6 +42,16 @@ def _origin(url,label="evidence"):
     match=re.match(r"^https://([^/?#]+)(?:[/?#]|$)",url,re.I)
     if not match or "@" in match.group(1):raise gl.vm.UserError(f"[EXPECTED] invalid {label} origin")
     return match.group(1).lower().rstrip(".")
+def _registrable_origin(origin):
+    """Conservative same-operator boundary for source authority.
+
+    A different hostname is not independent when it is under the same
+    registrable domain as the provider service (including alternate domains
+    such as status.<service-domain>).  The contract cannot perform DNS/WHOIS
+    verification, so it deliberately uses a fail-closed two-label boundary.
+    """
+    labels=origin.split(".")
+    return ".".join(labels[-2:]) if len(labels)>=2 else origin
 def _addr(v):
     s=v.as_hex if isinstance(v,Address) else str(v)
     if s.startswith("addr#"):s="0x"+s[5:]
@@ -72,7 +82,8 @@ def _source_registry(raw,service_url):
     service_origin=_origin(service_url,"service")
     if service_origin in seen and next(x["kind"] for x in out if x["origin"]==service_origin)!="PROVIDER_STATUS":raise gl.vm.UserError("[EXPECTED] service origin is provider-controlled")
     controlled={service_origin}|{x["origin"] for x in out if x["kind"] in ("PROVIDER_STATUS","CAPACITY_REPORT")}
-    if any(x["kind"]=="INDEPENDENT_PROBE" and x["origin"] in controlled for x in out):raise gl.vm.UserError("[EXPECTED] provider-controlled origin cannot be registered as independent")
+    controlled_domains={_registrable_origin(x) for x in controlled}
+    if any(x["kind"]=="INDEPENDENT_PROBE" and (_registrable_origin(x["origin"]) in controlled_domains or x["origin"] in controlled) for x in out):raise gl.vm.UserError("[EXPECTED] provider-controlled origin cannot be registered as independent")
     return out
 
 def _authorize_sources(registry,sources,allowed_kinds):
@@ -124,8 +135,7 @@ def _fetch(items):
         try:t=str(gl.nondet.web.render(x["url"],mode="text"))
         except Exception:return [],x["id"]
         if not t.strip():return [],x["id"]
-        evaluated=t[:MAX_EVIDENCE_CHARS]
-        out.append({**x,"content":evaluated,"hash":_hash(evaluated)})
+        out.append({**x,"content":t[:18000],"hash":_hash(t[:26000])})
     return out,""
 def _admission(raw):
     if isinstance(raw,str):
@@ -263,7 +273,7 @@ class Headroom(gl.Contract):
         cv={"id":cid,"provider":provider,**frozen,"spec_hash":_hash(_json(frozen)),"bond_balance_atto":str(bond),"bond_initial_atto":str(bond),"reserved_units":0,"reserved_liability_atto":"0","active_reservations":0,"active_reservation_ids":[],"reservation_count":0,"change_count":0,"incident_count":0,"status":"ACTIVE","challenge_window_seconds":str(challenge_window_seconds),"created_at":str(_now())}
         self._savecv(cv);self.covenant_ids.append(cid);self.total_deposited=u256(int(self.total_deposited)+bond);self.covenant_escrow=u256(int(self.covenant_escrow)+bond);return cid
 
-    @gl.public.write
+    @gl.public.write.payable
     def request_reservation(self,covenant_id:str,requested_units:int,max_credit_atto:int,starts_at:int,ends_at:int,workload_description:str)->str:
         cv=self._cv(covenant_id);now=_now()
         if cv["status"]!="ACTIVE" or not isinstance(requested_units,int) or requested_units<=0 or not isinstance(max_credit_atto,int) or max_credit_atto<MIN_CREDIT:raise gl.vm.UserError("[EXPECTED] invalid reservation request")
@@ -272,16 +282,30 @@ class Headroom(gl.Contract):
         rid=f"hr-r-{int(self.next_reservation)}";self.next_reservation=u256(int(self.next_reservation)+1);customer=_addr(gl.message.sender_address);safe_capacity=int(cv["capacity_ceiling_units"])*(10000-int(cv["min_headroom_bps"]))//10000;capacity_ok=int(cv["reserved_units"])+requested_units<=safe_capacity;liability_ok=int(cv["reserved_liability_atto"])+max_credit_atto<=int(cv["bond_balance_atto"])
         status="PENDING_ADMISSION" if capacity_ok and liability_ok else "DENIED_DETERMINISTIC"
         denial_basis="" if capacity_ok and liability_ok else "; ".join(x for x,ok in (("capacity headroom failure",capacity_ok),("collateral/liability headroom failure",liability_ok)) if not ok)
-        r={"id":rid,"covenant_id":covenant_id,"customer":customer,"requested_units":requested_units,"max_credit_atto":str(max_credit_atto),"starts_at":str(starts_at),"ends_at":str(ends_at),"workload_description":_text(workload_description,"workload description",1200,8),"capacity_precheck":capacity_ok,"liability_precheck":liability_ok,"status":status,"risk_state":"" if status=="PENDING_ADMISSION" else "RED","admission_basis":denial_basis,"admission_hash":"","reservation_case_hash":_hash(_json({"spec_hash":cv["spec_hash"],"reservation":rid,"starts_at":str(starts_at),"ends_at":str(ends_at),"workload":workload_description,"requested_units":requested_units,"max_credit_atto":str(max_credit_atto),"sources":cv["admission_sources"]})),"incident_id":"","created_at":str(now)}
+        stake=int(gl.message.value);minimum_stake=max(MIN_CREDIT,(max_credit_atto*MIN_REQUESTER_STAKE_BPS)//10000)
+        if stake and stake<minimum_stake:raise gl.vm.UserError("[EXPECTED] requester stake is not meaningful")
+        r={"id":rid,"covenant_id":covenant_id,"customer":customer,"requested_units":requested_units,"max_credit_atto":str(max_credit_atto),"requester_stake_atto":str(stake),"starts_at":str(starts_at),"ends_at":str(ends_at),"workload_description":_text(workload_description,"workload description",1200,8),"capacity_precheck":capacity_ok,"liability_precheck":liability_ok,"provider_authorized":False,"status":status,"risk_state":"" if status=="PENDING_ADMISSION" else "RED","admission_basis":denial_basis,"admission_hash":"","reservation_case_hash":_hash(_json({"spec_hash":cv["spec_hash"],"reservation":rid,"starts_at":str(starts_at),"ends_at":str(ends_at),"workload":workload_description,"requested_units":requested_units,"max_credit_atto":str(max_credit_atto),"requester_stake_atto":str(stake),"sources":cv["admission_sources"]})),"incident_id":"","created_at":str(now)}
         self._saver(r);self.reservation_ids.append(rid);self._append_page(self.reservation_pages,covenant_id,int(cv["reservation_count"]),rid);cv["reservation_count"]+=1;self._savecv(cv)
+        if stake:
+            self.total_deposited=u256(int(self.total_deposited)+stake);self.covenant_escrow=u256(int(self.covenant_escrow)+stake)
         if status=="DENIED_DETERMINISTIC":self.prevented=u256(int(self.prevented)+1)
         return rid
+
+    @gl.public.write
+    def authorize_reservation(self,reservation_id:str)->None:
+        r=self._r(reservation_id);cv=self._cv(r["covenant_id"])
+        if cv["status"]!="ACTIVE" or _addr(gl.message.sender_address)!=cv["provider"]:raise gl.vm.UserError("[EXPECTED] only active provider may authorize reservation")
+        if r["status"] not in ("PENDING_ADMISSION","ADMISSION_INCONCLUSIVE","SOURCE_UNAVAILABLE","HEADROOM_CHANGED"):raise gl.vm.UserError("[EXPECTED] reservation is not authorizable")
+        r["provider_authorized"]=True;r["admission_basis"]="provider authorization recorded";self._saver(r)
 
     @gl.public.write
     def review_reservation(self,reservation_id:str)->dict:
         r=self._r(reservation_id);cv=self._cv(r["covenant_id"])
         if cv["status"]!="ACTIVE":raise gl.vm.UserError("[EXPECTED] covenant is not active")
         if r["status"] not in ("PENDING_ADMISSION","ADMISSION_INCONCLUSIVE","SOURCE_UNAVAILABLE","HEADROOM_CHANGED"):raise gl.vm.UserError("[EXPECTED] reservation is not reviewable")
+        minimum_stake=max(MIN_CREDIT,(int(r["max_credit_atto"])*MIN_REQUESTER_STAKE_BPS)//10000)
+        if not r.get("provider_authorized",False) and int(r.get("requester_stake_atto","0"))<minimum_stake:
+            raise gl.vm.UserError("[EXPECTED] provider authorization or requester stake required before activation")
         if _now()>=int(r["starts_at"]):r["status"]="EXPIRED_UNADMITTED";self._saver(r);return {"result":"UNSAFE","risk_state":"UNKNOWN","service_healthy":False,"dependencies_healthy":False,"active_incident":False,"maintenance_conflict":False,"capacity_evidence_supports":False,"basis":"reservation start time passed before admission consensus"}
         frozen={"capacity_ceiling_units":cv["capacity_ceiling_units"],"min_headroom_bps":cv["min_headroom_bps"],"currently_reserved_units":cv["reserved_units"],"requested_units":r["requested_units"],"currently_reserved_liability_atto":cv["reserved_liability_atto"],"requested_credit_atto":r["max_credit_atto"],"bond_balance_atto":cv["bond_balance_atto"],"workload":r["workload_description"],"starts_at":r["starts_at"],"ends_at":r["ends_at"]}
         def leader_fn()->dict:
@@ -432,25 +456,21 @@ class Headroom(gl.Contract):
 
     @gl.public.write
     def examine_incident(self,incident_id:str)->dict:
-        # An unavailable or inconclusive examination is a non-decision during
-        # bounded retry. After a verified miss, the provider bears the burden
-        # of proving its frozen affirmative exception; an unresolved defence
-        # therefore defaults to full liability only after the deadline.
         i=self._i(incident_id);cv=self._cv(i["covenant_id"])
         if i["status"] not in ("EXCEPTION_CLAIMED","EXAM_INCONCLUSIVE","SOURCE_UNAVAILABLE"):raise gl.vm.UserError("[EXPECTED] incident is not ready for examination")
         clause=next(x for x in cv["exceptions"] if x["code"]==i["exception_code"]);permit=i.get("permitted_change",{});evidence=i["measurement_evidence"]+i["exception_evidence"]+([{"id":"PERMIT","url":permit["evidence_url"],"kind":"CHANGE_PERMIT","note":"frozen permitted change evidence"}] if permit else [])
         def leader_fn()->dict:
             pages,missing=_fetch(evidence)
-            if missing:return {"result":"SOURCE_UNAVAILABLE","impact_start":0,"impact_end":0,"exception_start":0,"exception_end":0,"service_affected":False,"exception_event_established":False,"causal_link_supported":False,"clause_rule_satisfied":False,"permit_matches":False,"source_conflict":False,"evidence_hashes":[],"basis":f"source {missing} unavailable"}
+            if missing:return {"result":"SOURCE_UNAVAILABLE","impact_start":0,"impact_end":0,"exception_start":0,"exception_end":0,"service_affected":False,"exception_event_established":False,"causal_link_supported":False,"clause_rule_satisfied":False,"permit_matches":False,"source_conflict":False,"basis":f"source {missing} unavailable"}
             prompt="""Reconstruct the factual incident timeline before deciding contractual liability. Establish customer/service impact timing, the invoked exception event timing, whether the service was affected, whether the exception event itself is established, whether evidence supports a causal link, whether the frozen clause rule itself is satisfied, whether a required permitted change matches, and whether material sources conflict. Return JSON only with result VERIFIED|INCONCLUSIVE|SOURCE_UNAVAILABLE, impact_start, impact_end, exception_start, exception_end Unix integers, service_affected bool, exception_event_established bool, causal_link_supported bool, clause_rule_satisfied bool, permit_matches bool, source_conflict bool, basis.\nFROZEN EXCEPTION:\n"""+_json(clause)+"\nMEASURED WINDOW:\n"+_json({"from":i["observed_from"],"to":i["observed_to"],"actual_availability_bps":i["actual_availability_bps"]})+"\nFROZEN PERMITTED CHANGE:\n"+_json(i.get("permitted_change",{}))+"\nEVIDENCE:\n"+_json(pages)
-            parsed=_exam(gl.nondet.exec_prompt(prompt,response_format="json"),int(i["observed_from"]),int(i["observed_to"]));parsed["evidence_hashes"]=[p["hash"] for p in pages];return parsed
+            return _exam(gl.nondet.exec_prompt(prompt,response_format="json"),int(i["observed_from"]),int(i["observed_to"]))
         def validator_fn(leader_result)->bool:
             try:
                 if not isinstance(leader_result,glvm.Return):return False
                 mine=leader_fn();theirs=leader_result.calldata;keys=("result","impact_start","impact_end","exception_start","exception_end","service_affected","exception_event_established","causal_link_supported","clause_rule_satisfied","permit_matches","source_conflict");return all(mine[k]==theirs.get(k) for k in keys)
             except Exception:
                 return False
-        result=glvm.run_nondet_unsafe(leader_fn,validator_fn);i["examination"]=result;i["basis"]=result["basis"];i["incident_case_hash"]=_hash(_json({"spec_hash":cv["spec_hash"],"incident":i["id"],"reservation":i["reservation_id"],"observed_from":i["observed_from"],"observed_to":i["observed_to"],"exception_code":i["exception_code"],"sources":evidence,"evidence_hashes":result.get("evidence_hashes",[]),"permit_hash":i.get("permitted_change",{}).get("permit_hash","")}))
+        result=glvm.run_nondet_unsafe(leader_fn,validator_fn);i["examination"]=result;i["basis"]=result["basis"];i["incident_case_hash"]=_hash(_json({"spec_hash":cv["spec_hash"],"incident":i["id"],"reservation":i["reservation_id"],"observed_from":i["observed_from"],"observed_to":i["observed_to"],"exception_code":i["exception_code"],"sources":evidence,"permit_hash":i.get("permitted_change",{}).get("permit_hash","")}))
         if result["result"]=="VERIFIED":i["status"]="EXAMINED"
         elif result["result"]=="SOURCE_UNAVAILABLE":i["status"]="SOURCE_UNAVAILABLE"
         else:i["status"]="EXAM_INCONCLUSIVE"
@@ -537,9 +557,6 @@ class Headroom(gl.Contract):
 
     @gl.public.write
     def finalize_default_breach(self,incident_id:str)->dict:
-        # This is not an immediate SOURCE_UNAVAILABLE decision. It is the
-        # bounded liveness exit for an independently verified miss whose
-        # provider exception defence remained unproven.
         i=self._i(incident_id);r=self._r(i["reservation_id"]);cv=self._cv(i["covenant_id"]);now=_now()
         if i["status"]=="OPEN":
             if now<int(i["response_deadline"]):raise gl.vm.UserError("[EXPECTED] provider response window is still open")
