@@ -172,6 +172,9 @@ def test_live_safe_admission_reserves_capacity_and_liability(direct_vm, direct_d
 def test_admission_validator_rechecks_substantive_live_state(direct_vm, direct_deploy, direct_alice, direct_bob):
     c = direct_deploy(CONTRACT); cid = create(direct_vm, c, direct_alice); direct_vm.sender = direct_bob
     rid = c.request_reservation(cid, 1000, 10**18, 1790000000, 1790180000, "normal workload")
+    direct_vm.sender = direct_alice
+    c.authorize_reservation(rid)
+    direct_vm.sender = direct_bob
     direct_vm.mock_web(r".*", {"status":200, "body":"healthy"})
     direct_vm.mock_llm(r".*", json.dumps({"result":"SAFE","risk_state":"GREEN","service_healthy":True,"dependencies_healthy":True,"active_incident":False,"maintenance_conflict":False,"capacity_evidence_supports":True,"basis":"healthy"}))
     c.review_reservation(rid)
@@ -184,6 +187,9 @@ def test_admission_validator_rechecks_substantive_live_state(direct_vm, direct_d
 def test_live_unsafe_admission_is_prevented(direct_vm, direct_deploy, direct_alice, direct_bob):
     c = direct_deploy(CONTRACT); cid = create(direct_vm, c, direct_alice); direct_vm.sender = direct_bob
     rid = c.request_reservation(cid, 1000, 10**18, 1790000000, 1790180000, "normal workload")
+    direct_vm.sender = direct_alice
+    c.authorize_reservation(rid)
+    direct_vm.sender = direct_bob
     direct_vm.mock_web(r".*", {"status":200, "body":"active regional incident"})
     direct_vm.mock_llm(r".*", json.dumps({"result":"UNSAFE","risk_state":"RED","service_healthy":False,"dependencies_healthy":False,"active_incident":True,"maintenance_conflict":False,"capacity_evidence_supports":False,"basis":"active incident"}))
     c.review_reservation(rid)
@@ -429,6 +435,8 @@ def test_safe_admission_race_fails_headroom_changed(direct_vm,direct_deploy,dire
     c=direct_deploy(CONTRACT);cid=create(direct_vm,c,direct_alice)
     direct_vm.sender=direct_bob;first=c.request_reservation(cid,9000,9*10**18,1790000000,1790180000,"large promise")
     direct_vm.sender=direct_charlie;second=c.request_reservation(cid,1000,10**18,1790000000,1790180000,"racing promise")
+    direct_vm.sender=direct_alice;c.authorize_reservation(first);c.authorize_reservation(second)
+    direct_vm.sender=direct_bob
     direct_vm.mock_web(r".*",{"status":200,"body":"healthy service and capacity"})
     direct_vm.mock_llm(r".*",json.dumps({"result":"SAFE","risk_state":"GREEN","service_healthy":True,"dependencies_healthy":True,"active_incident":False,"maintenance_conflict":False,"capacity_evidence_supports":True,"basis":"healthy now"}))
     c.review_reservation(first)
@@ -539,6 +547,9 @@ def test_challenge_refetches_original_permit_record_and_evidence(direct_vm,direc
     c.review_change(change_id);direct_vm.clear_mocks()
     direct_vm.sender=direct_bob
     rid=c.request_reservation(cid,1000,10**18,1790000000,1790180000,"steady API workload")
+    direct_vm.sender=direct_alice
+    c.authorize_reservation(rid)
+    direct_vm.sender=direct_bob
     direct_vm.mock_web(r".*",{"status":200,"body":"service and dependencies healthy"})
     direct_vm.mock_llm(r".*",json.dumps({"result":"SAFE","risk_state":"GREEN","service_healthy":True,"dependencies_healthy":True,"active_incident":False,"maintenance_conflict":False,"capacity_evidence_supports":True,"basis":"healthy now"}))
     c.review_reservation(rid);direct_vm.clear_mocks()
@@ -627,6 +638,9 @@ def test_malformed_leader_result_fails_without_economic_decision(direct_vm,direc
 def test_validator_source_failure_rejects_candidate(direct_vm,direct_deploy,direct_alice,direct_bob):
     c=direct_deploy(CONTRACT);cid=create(direct_vm,c,direct_alice);direct_vm.sender=direct_bob
     rid=c.request_reservation(cid,1000,10**18,1790000000,1790180000,"valid future workload")
+    direct_vm.sender=direct_alice
+    c.authorize_reservation(rid)
+    direct_vm.sender=direct_bob
     direct_vm.mock_web(r".*",{"status":200,"body":"healthy evidence"})
     direct_vm.mock_llm(r".*",json.dumps({"result":"SAFE","risk_state":"GREEN","service_healthy":True,"dependencies_healthy":True,"active_incident":False,"maintenance_conflict":False,"capacity_evidence_supports":True,"basis":"healthy"}))
     c.review_reservation(rid);direct_vm.clear_mocks();direct_vm.mock_web(r".*",{"status":200,"body":""})
