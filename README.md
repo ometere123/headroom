@@ -6,7 +6,7 @@
 
 **Don’t promise what you can’t serve.** HEADROOM controls whether SLA-backed service commitments and operational exceptions may exist before risk is taken. If prevention fails, the same frozen covenant governs incident facts and deterministic settlement.
 
-**Live app:** [the-headroom.vercel.app](https://the-headroom.vercel.app/) · **Protocol:** [Studionet explorer](https://explorer-studio.genlayer.com/address/0x44f03156B27d92e9527992744207ca73d0E6F980)
+**Live app:** [the-headroom.vercel.app](https://the-headroom.vercel.app/) · **Protocol:** [Studionet explorer](https://explorer-studio.genlayer.com/address/0xE0dB1742E5e218CC0dEEbCdF998D37Ed017037b2)
 
 ## What HEADROOM Does
 
@@ -75,15 +75,18 @@ A bonded challenge submits counter-evidence and re-fetches the original measurem
 | Chain ID | `61999` |
 | RPC | `https://studio.genlayer.com/api` |
 | Explorer | [explorer-studio.genlayer.com](https://explorer-studio.genlayer.com) |
-| Contract | [`0x44f03156B27d92e9527992744207ca73d0E6F980`](https://explorer-studio.genlayer.com/address/0x44f03156B27d92e9527992744207ca73d0E6F980) |
-| Deployment transaction | [`0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b`](https://explorer-studio.genlayer.com/tx/0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b) |
+| Contract | [`0xE0dB1742E5e218CC0dEEbCdF998D37Ed017037b2`](https://explorer-studio.genlayer.com/address/0xE0dB1742E5e218CC0dEEbCdF998D37Ed017037b2) |
+| Deployment transaction | [`0xd217dcd508e1009c4bbfbfc7dade9404147379a4c727672fee0a7a2bac19fec8`](https://explorer-studio.genlayer.com/tx/0xd217dcd508e1009c4bbfbfc7dade9404147379a4c727672fee0a7a2bac19fec8) |
 | Contract source | Corrected trust-boundary implementation in `contracts/headroom.py` |
-| Contract source SHA-256 | `FD652486B69C65DB6B7AACEF736BFF84C5A9E8456C946B117B95D13CD6FA5D11` |
+| Contract source commit | `d204e08cbe4753d80a865d34fc5f185e0d6083ed` |
+| Contract source SHA-256 | `0AB5E90F00286962ED9FC727D97288A61EDAAE59DB55334D531F89B68BDE1565` |
 | Frontend | [the-headroom.vercel.app](https://the-headroom.vercel.app/) |
 
-Deployment receipt is FINALIZED with successful execution. The documented deployment predates the immutable independent-source-authority correction now in this release candidate; it must not be treated as evidence that the new authority policy is live until a later redeployment. The deployed schema exposes 31 methods (10 views and 21 writes). `get_stats()` reports Studionet / 61999, balanced accounting, and no admin controls. See [review evidence](docs/REVIEW_EVIDENCE.md) for the verified receipt and state. Live semantic admission and economic lifecycle evidence are recorded only after those actions have occurred.
+Deployment receipt is FINALIZED with successful execution. The deployed schema exposes 31 methods (10 views and 21 writes). `get_stats()` reports Studionet / 61999, balanced accounting, and no admin controls. See [review evidence](docs/REVIEW_EVIDENCE.md) for the verified receipt and state. Live semantic admission and economic lifecycle evidence are recorded only after those actions have occurred.
 
 `INDEPENDENT_PROBE` is accepted only for the immutable contract-level authority origin `stats.uptimerobot.com`; the provider's registry cannot add authorities. Custom provider domains and CNAME aliases do not qualify because the parsed origin must match exactly. The same-registrable-domain provider-control check remains an additional defense. This is an allowlist policy, not DNS/WHOIS ownership verification.
+
+Reservation activation requires provider authorization or meaningful requester stake before provider capacity or collateral can be locked.
 
 ## Run Locally
 
@@ -96,7 +99,7 @@ pip install -r requirements.txt
 pytest tests/direct/ -v
 cd frontend
 npm install
-$env:NEXT_PUBLIC_HEADROOM_CONTRACT="0x44f03156B27d92e9527992744207ca73d0E6F980"
+$env:NEXT_PUBLIC_HEADROOM_CONTRACT="0xE0dB1742E5e218CC0dEEbCdF998D37Ed017037b2"
 $env:NEXT_PUBLIC_GENLAYER_CHAIN_ID="61999"
 $env:NEXT_PUBLIC_GENLAYER_RPC_URL="https://studio.genlayer.com/api"
 $env:NEXT_PUBLIC_GENLAYER_EXPLORER="https://explorer-studio.genlayer.com"

@@ -3,11 +3,11 @@
 ## Canonical deployment
 
 - Network: GenLayer Studionet, chain 61999; RPC `https://studio.genlayer.com/api`.
-- Contract: `0x44f03156B27d92e9527992744207ca73d0E6F980`.
-- Deployment transaction: `0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b`; FINALIZED and successful execution.
-- The deployed contract source corresponds to the corrected trust-boundary implementation in `contracts/headroom.py` (SHA-256 `FD652486B69C65DB6B7AACEF736BFF84C5A9E8456C946B117B95D13CD6FA5D11`). Frontend and documentation work does not require a contract redeployment.
+- Contract: `0xE0dB1742E5e218CC0dEEbCdF998D37Ed017037b2`.
+- Deployment transaction: `0xd217dcd508e1009c4bbfbfc7dade9404147379a4c727672fee0a7a2bac19fec8`; FINALIZED and successful execution.
+- The deployed contract source is commit `d204e08cbe4753d80a865d34fc5f185e0d6083ed`, corresponding to `contracts/headroom.py` (SHA-256 `0AB5E90F00286962ED9FC727D97288A61EDAAE59DB55334D531F89B68BDE1565`).
 - Deployed schema: 31 methods, 10 views and 21 writes. Deployed `get_stats()` reports Studionet/61999, `accounting_balanced=true`, and `admin_controls=false`.
-- Release candidate authority rule: `INDEPENDENT_PROBE` must use the immutable contract-level origin `stats.uptimerobot.com`; the provider registry cannot extend this set. Custom provider domains and CNAME aliases do not qualify. The existing deployment predates this correction and is not evidence that the new rule is live.
+- Activation requires provider authorization or meaningful requester stake before provider capacity or collateral can be locked. `INDEPENDENT_PROBE` must use immutable `stats.uptimerobot.com`; provider registries cannot extend it. Custom provider domains/CNAME aliases do not qualify, same-registrable-domain rejection remains defense in depth, and no DNS/WHOIS verification is claimed.
 
 ## Release candidate
 
@@ -18,7 +18,7 @@ The app uses an infrastructure operations shell with a persistent operations rai
 | Stable network lock | Studionet 61999 only |
 | Contract source / deployment match | Verified against the corrected trust-boundary source candidate |
 | Contract methods | 10 views / 21 writes |
-| Direct Mode | 60 tests collected; final pass count will be recorded from the authority-fix CI run |
+| Direct Mode | 60 passed in [GitHub Actions run 35908341602](https://github.com/ometere123/headroom/actions/runs/35908341602) |
 | GenVM validation/lint | Pinned linter; only the exact reviewed seven E010 diagnostics are allowed |
 | Static release/pattern/frontend checks | Candidate result recorded in review evidence |
 | Frontend typecheck/build | Candidate result recorded in review evidence |

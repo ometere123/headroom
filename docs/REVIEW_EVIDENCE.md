@@ -8,17 +8,18 @@
 | Chain ID | `61999` |
 | RPC | `https://studio.genlayer.com/api` |
 | Explorer | [explorer-studio.genlayer.com](https://explorer-studio.genlayer.com) |
-| Contract | [`0x44f03156B27d92e9527992744207ca73d0E6F980`](https://explorer-studio.genlayer.com/address/0x44f03156B27d92e9527992744207ca73d0E6F980) |
-| Deployment transaction | [`0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b`](https://explorer-studio.genlayer.com/tx/0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b) |
-| Deployment status | FINALIZED; execution SUCCESS; 5 AGREE |
+| Contract | [`0xE0dB1742E5e218CC0dEEbCdF998D37Ed017037b2`](https://explorer-studio.genlayer.com/address/0xE0dB1742E5e218CC0dEEbCdF998D37Ed017037b2) |
+| Deployment transaction | [`0xd217dcd508e1009c4bbfbfc7dade9404147379a4c727672fee0a7a2bac19fec8`](https://explorer-studio.genlayer.com/tx/0xd217dcd508e1009c4bbfbfc7dade9404147379a4c727672fee0a7a2bac19fec8) |
+| Deployment status | FINALIZED; execution SUCCESS / return |
 | Contract source | Corrected trust-boundary implementation in `contracts/headroom.py` |
-| Deployed source SHA-256 | `FD652486B69C65DB6B7AACEF736BFF84C5A9E8456C946B117B95D13CD6FA5D11` |
+| Deployed source commit | `d204e08cbe4753d80a865d34fc5f185e0d6083ed` |
+| Deployed source SHA-256 | `0AB5E90F00286962ED9FC727D97288A61EDAAE59DB55334D531F89B68BDE1565` |
 | Source match | Deployment record corresponds to the corrected local source candidate |
 | Schema | 31 methods: 10 views and 21 writes |
 | CLI | GenLayer CLI 0.39.1; network config Studionet / 61999 / stable RPC |
 | Frontend | [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/) |
 
-The deployment record identifies the previously deployed requester-boundary source. The current release candidate adds an immutable contract-level `INDEPENDENT_PROBE` authority allowlist containing `stats.uptimerobot.com`; the provider cannot extend it through its registry. Custom provider domains and CNAME aliases do not qualify because the parsed origin must match exactly. The existing canonical deployment predates this correction, so the new authority rule is not claimed as live until redeployment. This is an explicit contract policy, not DNS/WHOIS ownership verification.
+Reservation activation requires provider authorization or meaningful requester stake before provider capacity/collateral can be locked. `INDEPENDENT_PROBE` uses the immutable contract-level authority `stats.uptimerobot.com`; provider registries cannot extend it. Custom provider domains/CNAME aliases do not qualify, same-registrable-domain rejection remains defense in depth, and no DNS/WHOIS verification is claimed.
 
 ## Deployed `get_stats()`
 
@@ -53,15 +54,15 @@ Record final candidate evidence here after checks run on the pushed release comm
 | Check | Result |
 | --- | --- |
 | Python | 3.12.14 (GitHub Actions) |
-| Direct Mode | `genlayer-test==0.29.2`, `genlayer-py==0.16.3`; 60 tests collected, final pass count pending authority-fix CI |
+| Direct Mode | `genlayer-test==0.29.2`, `genlayer-py==0.16.3`; 60 passed |
 | GenVM lint | `genvm-linter==0.11.1rc2`; validation must pass; exact reviewed seven E010 warnings only |
-| `py_compile` | record result |
-| `check_release.py` | record result |
-| `check_contract_patterns.py` | record result |
-| `check_frontend_surface.py` | record result |
+| `py_compile` | PASS |
+| `check_release.py` | PASS |
+| `check_contract_patterns.py` | PASS |
+| `check_frontend_surface.py` | PASS |
 | Frontend SDK | exact `genlayer-js==1.1.8` |
-| Frontend typecheck/build | record result |
-| GitHub Actions | Final green authority-fix run will be recorded after CI completes |
+| Frontend typecheck/build | PASS |
+| GitHub Actions | [run 35908341602](https://github.com/ometere123/headroom/actions/runs/35908341602), green on commit `d204e08cbe4753d80a865d34fc5f185e0d6083ed` |
 | Vercel | existing project `headroom`, Production domain `the-headroom.vercel.app`; record deployment ID/result |
 
 ## Chronological live transaction evidence
@@ -70,7 +71,8 @@ Only the deployment transaction exists at the time this evidence was written. Em
 
 | Action | Method | Transaction | Finalized? | Execution success? | Result | Evidence / state |
 | --- | --- | --- | --- | --- | --- | --- |
-| Deploy canonical Headroom | Deployment | [`0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b`](https://explorer-studio.genlayer.com/tx/0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b) | Yes | Yes | Contract created at canonical address | [Contract explorer](https://explorer-studio.genlayer.com/address/0x44f03156B27d92e9527992744207ca73d0E6F980); source hash above |
+| Deploy corrected Headroom | Deployment | [`0xd217dcd508e1009c4bbfbfc7dade9404147379a4c727672fee0a7a2bac19fec8`](https://explorer-studio.genlayer.com/tx/0xd217dcd508e1009c4bbfbfc7dade9404147379a4c727672fee0a7a2bac19fec8) | Yes | Yes | Contract created at canonical address | [Contract explorer](https://explorer-studio.genlayer.com/address/0xE0dB1742E5e218CC0dEEbCdF998D37Ed017037b2); source commit and hash above |
+| Previous deployment (SUPERSEDED) | Deployment | `0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b` | Yes | Yes | Historical requester-boundary deployment only | Superseded by corrected deployment above; not evidence for current authority policy |
 | Create/bond covenant | `create_covenant` | NOT EXECUTED | — | — | Awaiting user wallet approval | No covenant exists in initial deployed state |
 | Deterministic prevention | `request_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Must inspect post-state and `prevented` count |
 | Semantic prevention | `review_reservation` | NOT EXECUTED | — | — | Not yet demonstrated live | Requires truthful, currently unsafe evidence |
