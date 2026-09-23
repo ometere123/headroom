@@ -1,3 +1,1 @@
-import CovenantDetail from '@/app/covenants/[id]/page';
-export default function ServiceWorkspace(){ return <CovenantDetail mode='incidents'/>; }
-
+export { default } from "@/app/covenants/[id]/page";
