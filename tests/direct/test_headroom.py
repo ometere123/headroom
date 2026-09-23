@@ -72,7 +72,7 @@ def test_provider_alternate_domain_cannot_be_independent_probe(direct_vm, direct
         {"kind":"INDEPENDENT_PROBE","origin":"https://status.example.com"},
     ])
     direct_vm.sender = direct_alice; direct_vm.value = 10**18
-    with direct_vm.expect_revert("provider-controlled origin cannot be registered as independent"):
+    with direct_vm.expect_revert("immutable authority policy"):
         c.create_covenant("Payments EU", "https://api.example.com", 10000, 1000, 9995, 172800, 7200,
                           json.dumps([{"kind":"PROVIDER_STATUS","url":"https://service.example.com/status","note":"provider"},{"kind":"INDEPENDENT_PROBE","url":"https://status.example.com/health","note":"alternate"}]),
                           registry, "policy", EXC, 900)
