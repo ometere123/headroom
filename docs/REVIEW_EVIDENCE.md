@@ -18,7 +18,7 @@
 | CLI | GenLayer CLI 0.39.1; network config Studionet / 61999 / stable RPC |
 | Frontend | [https://the-headroom.vercel.app/](https://the-headroom.vercel.app/) |
 
-The deployment record identifies the corrected contract source. Later frontend and documentation commits do not change the contract and do not require redeployment.
+The deployment record identifies the previously deployed requester-boundary source. The current release candidate adds an immutable contract-level `INDEPENDENT_PROBE` authority allowlist containing `stats.uptimerobot.com`; the provider cannot extend it through its registry. Custom provider domains and CNAME aliases do not qualify because the parsed origin must match exactly. The existing canonical deployment predates this correction, so the new authority rule is not claimed as live until redeployment. This is an explicit contract policy, not DNS/WHOIS ownership verification.
 
 ## Deployed `get_stats()`
 
@@ -52,8 +52,8 @@ Record final candidate evidence here after checks run on the pushed release comm
 
 | Check | Result |
 | --- | --- |
-| Python | 3.12.x; record exact runtime with final run |
-| Direct Mode | `genlayer-test==0.29.2`, `genlayer-py==0.16.3`; record exact pass count |
+| Python | 3.12.14 (GitHub Actions) |
+| Direct Mode | `genlayer-test==0.29.2`, `genlayer-py==0.16.3`; 60 tests collected, final pass count pending authority-fix CI |
 | GenVM lint | `genvm-linter==0.11.1rc2`; validation must pass; exact reviewed seven E010 warnings only |
 | `py_compile` | record result |
 | `check_release.py` | record result |
@@ -61,7 +61,7 @@ Record final candidate evidence here after checks run on the pushed release comm
 | `check_frontend_surface.py` | record result |
 | Frontend SDK | exact `genlayer-js==1.1.8` |
 | Frontend typecheck/build | record result |
-| GitHub Actions | record final green run URL |
+| GitHub Actions | Final green authority-fix run will be recorded after CI completes |
 | Vercel | existing project `headroom`, Production domain `the-headroom.vercel.app`; record deployment ID/result |
 
 ## Chronological live transaction evidence

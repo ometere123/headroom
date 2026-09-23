@@ -4,8 +4,9 @@
 - Canonical contract: `0x44f03156B27d92e9527992744207ca73d0E6F980`.
 - Deployment: `0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b`; FINALIZED with successful execution.
 - Deployed source corresponds to the corrected trust-boundary implementation in `contracts/headroom.py` (SHA-256 `FD652486B69C65DB6B7AACEF736BFF84C5A9E8456C946B117B95D13CD6FA5D11`); deployed schema is 10 views / 21 writes.
+- Release-candidate source rule: `INDEPENDENT_PROBE` accepts only the immutable contract-level origin `stats.uptimerobot.com`; the provider registry cannot extend it. Custom provider domains and CNAME aliases do not qualify. The existing deployment predates this correction, which is not DNS/WHOIS ownership verification and is not yet live.
 - Pinned linter gate validates the contract and tolerates only the exact reviewed seven E010 custom validator reachability warnings. See `docs/genvm-lint-disposition.md` and `docs/genvm-lint-full-output.txt`.
-- Direct Mode uses Python 3.12, `genlayer-test==0.29.2`, `genlayer-py==0.16.3`, and the tested pinned GenVM runner. The current suite contains 54 tests.
+- Direct Mode uses Python 3.12, `genlayer-test==0.29.2`, `genlayer-py==0.16.3`, and the tested pinned GenVM runner. The current suite contains 60 tests; final pass count will be recorded from the authority-fix CI run.
 - Frontend is pinned to `genlayer-js==1.1.8`; candidate typecheck/build, CI, Vercel deploy, and browser results are recorded in `docs/REVIEW_EVIDENCE.md`.
 - Initial deployed `get_stats()` reports zero covenants/reservations/changes/incidents/admissions/preventions/settlements, `accounting_balanced=true`, and `admin_controls=false`.
 

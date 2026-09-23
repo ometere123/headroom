@@ -3,6 +3,7 @@ export type EvidenceKind = typeof evidenceKinds[number];
 export type EvidenceSource = { kind: EvidenceKind; url: string; note: string };
 export type RegistryEntry = { origin: string; kind: EvidenceKind };
 export type ExceptionClause = { code:string; title:string; rule:string; requires_change_permit:boolean };
+export const independentAuthorityOrigins = ["https://stats.uptimerobot.com"] as const;
 export function validateSources(rows: EvidenceSource[], requireProbe = false): string[] {
   const errors:string[]=[];
   if (!rows.length) errors.push("Add at least one evidence source.");
@@ -16,6 +17,7 @@ export function validateRegistry(rows: RegistryEntry[]): string[] {
   const origins=rows.map(row=>{try{const u=new URL(row.origin);if(u.protocol!=="https:")errors.push("Authorized origins must use HTTPS.");return u.origin.toLowerCase()}catch{errors.push("Enter a valid HTTPS origin.");return ""}});
   if(new Set(origins).size!==origins.length) errors.push("Register each origin only once.");
   if(!rows.some(row=>row.kind==="INDEPENDENT_PROBE")) errors.push("Authorize a genuine independent probe origin.");
+  if(rows.some(row=>row.kind==="INDEPENDENT_PROBE"&&!independentAuthorityOrigins.includes(row.origin.replace(/\/$/,"").toLowerCase() as typeof independentAuthorityOrigins[number]))) errors.push("Independent probe URL must use a supported third-party monitoring authority.");
   return errors;
 }
 export function serializeAdmissionSources(rows:EvidenceSource[]){return JSON.stringify(rows);}

@@ -9,6 +9,7 @@ VERSION="0.1.0-studionet";NETWORK_ID = "61999";RPC_URL = "https://studio.genlaye
 MIN_PROVIDER_BOND=10**16;MAX_PROVIDER_BOND=1000*10**18;MIN_CREDIT=10**14;MAX_PAGE=30;MAX_SOURCES=8;MAX_SOURCE_REGISTRY=32;MAX_EXCEPTIONS=8;MAX_ACTIVE=64;CHALLENGE_MIN=600;CHALLENGE_MAX=86400;PROVIDER_RESPONSE_SECONDS=3600;ADJUDICATION_GRACE_SECONDS=24*3600;MEASUREMENT_RETRY_SECONDS=6*3600;CHALLENGE_RESOLUTION_GRACE_SECONDS=24*3600
 FORMATION_LEAD_SECONDS=300
 MIN_REQUESTER_STAKE_BPS=1000
+INDEPENDENT_AUTHORITY_ORIGINS=("stats.uptimerobot.com",)
 ADMISSION_RESULTS=("SAFE","UNSAFE","INCONCLUSIVE","SOURCE_UNAVAILABLE")
 MEASUREMENT_RESULTS=("VERIFIED","NOT_PROVEN","SOURCE_UNAVAILABLE")
 EXAM_RESULTS=("VERIFIED","INCONCLUSIVE","SOURCE_UNAVAILABLE")
@@ -52,6 +53,8 @@ def _registrable_origin(origin):
     """
     labels=origin.split(".")
     return ".".join(labels[-2:]) if len(labels)>=2 else origin
+def _trusted_independent_probe(origin):
+    return origin in INDEPENDENT_AUTHORITY_ORIGINS
 def _addr(v):
     s=v.as_hex if isinstance(v,Address) else str(v)
     if s.startswith("addr#"):s="0x"+s[5:]
@@ -83,6 +86,7 @@ def _source_registry(raw,service_url):
     if service_origin in seen and next(x["kind"] for x in out if x["origin"]==service_origin)!="PROVIDER_STATUS":raise gl.vm.UserError("[EXPECTED] service origin is provider-controlled")
     controlled={service_origin}|{x["origin"] for x in out if x["kind"] in ("PROVIDER_STATUS","CAPACITY_REPORT")}
     controlled_domains={_registrable_origin(x) for x in controlled}
+    if any(x["kind"]=="INDEPENDENT_PROBE" and not _trusted_independent_probe(x["origin"]) for x in out):raise gl.vm.UserError("[EXPECTED] independent probe origin is not in immutable authority policy")
     if any(x["kind"]=="INDEPENDENT_PROBE" and (_registrable_origin(x["origin"]) in controlled_domains or x["origin"] in controlled) for x in out):raise gl.vm.UserError("[EXPECTED] provider-controlled origin cannot be registered as independent")
     return out
 

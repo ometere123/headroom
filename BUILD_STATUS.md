@@ -7,6 +7,7 @@
 - Deployment transaction: `0x4976cfd3c27c3d31db6a9a9769ee887269b1e6b0940161924a1b023f272ac40b`; FINALIZED and successful execution.
 - The deployed contract source corresponds to the corrected trust-boundary implementation in `contracts/headroom.py` (SHA-256 `FD652486B69C65DB6B7AACEF736BFF84C5A9E8456C946B117B95D13CD6FA5D11`). Frontend and documentation work does not require a contract redeployment.
 - Deployed schema: 31 methods, 10 views and 21 writes. Deployed `get_stats()` reports Studionet/61999, `accounting_balanced=true`, and `admin_controls=false`.
+- Release candidate authority rule: `INDEPENDENT_PROBE` must use the immutable contract-level origin `stats.uptimerobot.com`; the provider registry cannot extend this set. Custom provider domains and CNAME aliases do not qualify. The existing deployment predates this correction and is not evidence that the new rule is live.
 
 ## Release candidate
 
@@ -17,7 +18,7 @@ The app uses an infrastructure operations shell with a persistent operations rai
 | Stable network lock | Studionet 61999 only |
 | Contract source / deployment match | Verified against the corrected trust-boundary source candidate |
 | Contract methods | 10 views / 21 writes |
-| Direct Mode | 54 tests; exact candidate rerun is recorded in `docs/REVIEW_EVIDENCE.md` after CI |
+| Direct Mode | 60 tests collected; final pass count will be recorded from the authority-fix CI run |
 | GenVM validation/lint | Pinned linter; only the exact reviewed seven E010 diagnostics are allowed |
 | Static release/pattern/frontend checks | Candidate result recorded in review evidence |
 | Frontend typecheck/build | Candidate result recorded in review evidence |

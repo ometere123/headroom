@@ -81,7 +81,9 @@ A bonded challenge submits counter-evidence and re-fetches the original measurem
 | Contract source SHA-256 | `FD652486B69C65DB6B7AACEF736BFF84C5A9E8456C946B117B95D13CD6FA5D11` |
 | Frontend | [the-headroom.vercel.app](https://the-headroom.vercel.app/) |
 
-Deployment receipt is FINALIZED with successful execution. The deployed source corresponds to the corrected trust-boundary implementation in `contracts/headroom.py`; the deployed schema exposes 31 methods (10 views and 21 writes). `get_stats()` reports Studionet / 61999, balanced accounting, and no admin controls. See [review evidence](docs/REVIEW_EVIDENCE.md) for the verified receipt and state. Live semantic admission and economic lifecycle evidence are recorded only after those actions have occurred.
+Deployment receipt is FINALIZED with successful execution. The documented deployment predates the immutable independent-source-authority correction now in this release candidate; it must not be treated as evidence that the new authority policy is live until a later redeployment. The deployed schema exposes 31 methods (10 views and 21 writes). `get_stats()` reports Studionet / 61999, balanced accounting, and no admin controls. See [review evidence](docs/REVIEW_EVIDENCE.md) for the verified receipt and state. Live semantic admission and economic lifecycle evidence are recorded only after those actions have occurred.
+
+`INDEPENDENT_PROBE` is accepted only for the immutable contract-level authority origin `stats.uptimerobot.com`; the provider's registry cannot add authorities. Custom provider domains and CNAME aliases do not qualify because the parsed origin must match exactly. The same-registrable-domain provider-control check remains an additional defense. This is an allowlist policy, not DNS/WHOIS ownership verification.
 
 ## Run Locally
 

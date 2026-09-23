@@ -7,18 +7,18 @@ from tests.direct.conftest import hx
 CONTRACT = "contracts/headroom.py"
 SOURCES = json.dumps([
     {"kind":"PROVIDER_STATUS","url":"https://service.example/status","note":"provider status and active incidents"},
-    {"kind":"INDEPENDENT_PROBE","url":"https://probe.example/health","note":"independent service probe and capacity signal"},
+    {"kind":"INDEPENDENT_PROBE","url":"https://stats.uptimerobot.com/example-public-page","note":"independent service probe and capacity signal"},
 ])
 EXC = json.dumps([
     {"code":"MAINT","title":"Scheduled maintenance","rule":"requires permitted change and notice","requires_change_permit":True},
     {"code":"UPSTREAM","title":"Upstream failure","rule":"must causally overlap impact","requires_change_permit":False},
 ])
 MEASUREMENT = json.dumps([
-    {"kind":"INDEPENDENT_PROBE","url":"https://probe.example/incident","note":"independent measured availability window"},
+    {"kind":"INDEPENDENT_PROBE","url":"https://stats.uptimerobot.com/example-public-page","note":"independent measured availability window"},
     {"kind":"STATUS_AGGREGATOR","url":"https://status-archive.example/incident","note":"separate public archive for the same window"},
 ])
 UPSTREAM = json.dumps([{"kind":"UPSTREAM_STATUS","url":"https://status.example/up","note":"upstream incident timeline"}])
-REGISTRY = json.dumps([{"kind":"PROVIDER_STATUS","origin":"https://service.example"},{"kind":"INDEPENDENT_PROBE","origin":"https://probe.example"},{"kind":"STATUS_AGGREGATOR","origin":"https://status-archive.example"},{"kind":"UPSTREAM_STATUS","origin":"https://status.example"},{"kind":"CHANGE_NOTICE","origin":"https://change.example"},{"kind":"CHALLENGE_COUNTER_EVIDENCE","origin":"https://counter.example"}])
+REGISTRY = json.dumps([{"kind":"PROVIDER_STATUS","origin":"https://service.example"},{"kind":"INDEPENDENT_PROBE","origin":"https://stats.uptimerobot.com"},{"kind":"STATUS_AGGREGATOR","origin":"https://status-archive.example"},{"kind":"UPSTREAM_STATUS","origin":"https://status.example"},{"kind":"CHANGE_NOTICE","origin":"https://change.example"},{"kind":"CHALLENGE_COUNTER_EVIDENCE","origin":"https://counter.example"}])
 
 
 def create(vm, c, provider, bond=10 * 10**18, registry=REGISTRY):
@@ -313,7 +313,7 @@ def test_stats_expose_prevention_and_no_admin(direct_vm, direct_deploy):
 
 def test_incident_measurement_requires_independent_probe_and_second_source_family(direct_vm,direct_deploy,direct_alice,direct_bob):
     c,cid,rid=active_reservation(direct_vm,direct_deploy,direct_alice,direct_bob);direct_vm.sender=direct_bob
-    one=json.dumps([{"kind":"INDEPENDENT_PROBE","url":"https://probe.example/only","note":"single source"}])
+    one=json.dumps([{"kind":"INDEPENDENT_PROBE","url":"https://stats.uptimerobot.com/example-public-page","note":"single source"}])
     with direct_vm.expect_revert("use 2"):
         c.open_incident(rid,9900,1790001000,1790004600,one)
     same=json.dumps([{"kind":"INDEPENDENT_PROBE","url":"https://probe-a.example/x","note":"probe a"},{"kind":"INDEPENDENT_PROBE","url":"https://probe-b.example/x","note":"probe b"}])
@@ -514,7 +514,7 @@ def test_challenge_refetches_original_measurement_exception_and_counter_sources(
     c,cid,rid,iid=pending_liability(direct_vm,direct_deploy,direct_alice,direct_bob)
     direct_vm.sender=direct_bob;direct_vm.value=10**16
     c.challenge_liability(iid,"The exception began later than recorded.","https://counter.example/evidence");direct_vm.value=0
-    for pattern,body in [(r"probe\.example/incident","original measurement probe"),(r"status-archive\.example/incident","original measurement archive"),(r"status\.example/up","original exception record"),(r"counter\.example/evidence","challenge counter evidence")]:
+    for pattern,body in [(r"stats\.uptimerobot\.com/example-public-page","original measurement probe"),(r"status-archive\.example/incident","original measurement archive"),(r"status\.example/up","original exception record"),(r"counter\.example/evidence","challenge counter evidence")]:
         direct_vm.mock_web(pattern,{"status":200,"body":body})
     corrected={"result":"VERIFIED","impact_start":1790001000,"impact_end":1790004600,"exception_start":1790003000,"exception_end":1790004600,"service_affected":True,"exception_event_established":True,"causal_link_supported":True,"clause_rule_satisfied":True,"permit_matches":False,"source_conflict":False,"basis":"counter-evidence corrects event start"}
     direct_vm.mock_llm(r".*",json.dumps({"outcome":"UPHELD","corrected_examination":corrected,"basis":"reconstructed the full original case"}))
@@ -565,7 +565,7 @@ def test_challenge_refetches_original_permit_record_and_evidence(direct_vm,direc
     direct_vm.mock_llm(r".*",json.dumps(exam));c.examine_incident(iid);c.judge_liability(iid);direct_vm.clear_mocks()
     direct_vm.sender=direct_bob;direct_vm.value=10**16
     c.challenge_liability(iid,"The event was not causally connected.","https://counter.example/evidence");direct_vm.value=0
-    for pattern,body in [(r"probe\.example/incident","original measurement probe"),(r"status-archive\.example/incident","original measurement archive"),(r"status\.example/up","original exception evidence"),(r"change\.example/plan","frozen permit evidence"),(r"counter\.example/evidence","challenge counter evidence")]:
+    for pattern,body in [(r"stats\.uptimerobot\.com/example-public-page","original measurement probe"),(r"status-archive\.example/incident","original exception evidence"),(r"status\.example/up","original exception evidence"),(r"change\.example/plan","frozen permit evidence"),(r"counter\.example/evidence","challenge counter evidence")]:
         direct_vm.mock_web(pattern,{"status":200,"body":body})
     direct_vm.mock_llm(r".*",json.dumps({"outcome":"REJECTED","corrected_examination":None,"basis":"full case reconstruction supports the original facts"}))
     result=c.resolve_challenge(iid)
@@ -694,9 +694,28 @@ def test_provider_controlled_origin_cannot_be_registered_as_independent(direct_v
     with direct_vm.expect_revert("service origin is provider-controlled"):
         c.create_covenant("API","https://api.example.com",1000,1000,9995,3600,1800,SOURCES,registry,"public evidence policy",EXC,900)
 
+def test_different_untrusted_domain_cannot_be_independent_probe(direct_vm,direct_deploy,direct_alice):
+    c=direct_deploy(CONTRACT);direct_vm.sender=direct_alice;direct_vm.value=10**18;direct_vm.warp("2026-09-19T12:00:00Z")
+    registry=json.dumps([{"kind":"PROVIDER_STATUS","origin":"https://api.example.com"},{"kind":"INDEPENDENT_PROBE","origin":"https://provider-owned-alternate.net"}])
+    sources=json.dumps([{"kind":"PROVIDER_STATUS","url":"https://api.example.com/status","note":"provider"},{"kind":"INDEPENDENT_PROBE","url":"https://provider-owned-alternate.net/health","note":"self declared alternate"}])
+    with direct_vm.expect_revert("immutable authority policy"):
+        c.create_covenant("API","https://api.example.com",1000,1000,9995,3600,1800,sources,registry,"public evidence policy",EXC,900)
+
+def test_provider_custom_domain_cannot_alias_independent_authority(direct_vm,direct_deploy,direct_alice):
+    c=direct_deploy(CONTRACT);direct_vm.sender=direct_alice;direct_vm.value=10**18;direct_vm.warp("2026-09-19T12:00:00Z")
+    registry=json.dumps([{"kind":"PROVIDER_STATUS","origin":"https://api.example.com"},{"kind":"INDEPENDENT_PROBE","origin":"https://status.provider.com"}])
+    sources=json.dumps([{"kind":"PROVIDER_STATUS","url":"https://api.example.com/status","note":"provider"},{"kind":"INDEPENDENT_PROBE","url":"https://status.provider.com/health","note":"CNAME alias attempt"}])
+    with direct_vm.expect_revert("immutable authority policy"):
+        c.create_covenant("API","https://api.example.com",1000,1000,9995,3600,1800,sources,registry,"public evidence policy",EXC,900)
+
+def test_immutable_independent_probe_authority_accepts_legitimate_origin(direct_vm,direct_deploy,direct_alice):
+    c=direct_deploy(CONTRACT);direct_vm.sender=direct_alice;direct_vm.value=10**18;direct_vm.warp("2026-09-19T12:00:00Z")
+    cid=c.create_covenant("API","https://api.example.com",1000,1000,9995,3600,1800,SOURCES,REGISTRY,"public evidence policy",EXC,900)
+    assert c.get_covenant(cid)["status"]=="ACTIVE"
+
 def test_frozen_origin_with_wrong_class_is_rejected_for_measurement(direct_vm,direct_deploy,direct_alice,direct_bob):
     c,cid,rid=active_reservation(direct_vm,direct_deploy,direct_alice,direct_bob)
-    wrong=json.dumps([{"kind":"INDEPENDENT_PROBE","url":"https://probe.example/incident","note":"probe"},{"kind":"PUBLIC_TELEMETRY","url":"https://status-archive.example/incident","note":"wrong class for registered origin"}])
+    wrong=json.dumps([{"kind":"INDEPENDENT_PROBE","url":"https://stats.uptimerobot.com/example-public-page","note":"probe"},{"kind":"PUBLIC_TELEMETRY","url":"https://status-archive.example/incident","note":"wrong class for registered origin"}])
     with direct_vm.expect_revert("origin/class is not authorized"):
         c.open_incident(rid,9900,1790001000,1790004600,wrong)
 
